@@ -7,6 +7,12 @@ patch =
 
 
 
+src
+visit the tree:
+    if node.hash in cached:
+        src.replace [from,to] with just "ID"
+
+
 
 what's the issue?
 we want to provide the diff to the client from X_i to X_now

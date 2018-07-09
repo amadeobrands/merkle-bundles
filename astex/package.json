@@ -2,7 +2,7 @@
   "scripts": {
     "pretest": "npm run build",
     "test": "mocha --compilers js:babel-core/register ./src/**/*.test.js",
-    "build": "babel ./src -d ./dist --ignore test.js && node dist/merkle.js"
+    "build": "babel ./src -d ./dist --ignore test.js && node dist/example.js"
   },
   "files": [
     "dist"
@@ -11,11 +11,15 @@
     "deep-diff": "^1.0.1",
     "deep-object-diff": "^1.1.0",
     "esprima": "^4.0.0",
+    "express": "^4.16.3",
     "get-object-type": "0.0.2",
+    "hex-to-array-buffer": "^1.1.0",
     "js-sha256": "^0.9.0",
     "json-diff": "^0.5.2",
     "lodash": "^4.17.10",
     "minimal-object-diff": "^0.1.0",
+    "msgpack-lite": "^0.1.26",
+    "protobufjs": "^6.8.6",
     "recast": "^0.15.0",
     "symbol-description": "^1.0.0"
   },
