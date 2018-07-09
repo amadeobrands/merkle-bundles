@@ -270,10 +270,14 @@ function buildDiff(treeWithLocs, commonChunks) {
         return [
             ...prev,
             Object.assign(curr, {
-                prevTo: (before && before.to) || 0
+                prevTo: (before && before.to) || 0,
             })
         ]
     }, [])
+
+    let lastBit = [ src.substring(g[g.length - 1].to) ];
+
+    g = g
     .reduce((prev, curr) => {
         return [
             ...prev,
@@ -281,7 +285,7 @@ function buildDiff(treeWithLocs, commonChunks) {
             chunkId(curr.id),
         ]
     }, [])
-
+    .concat(lastBit)
 
     return {
         chunks: sorted.map(chunk => chunk.id),
