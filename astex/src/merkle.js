@@ -6,7 +6,7 @@ const sha224 = require('js-sha256').sha224;
 const hexToArrayBuffer = require('hex-to-array-buffer')
 const hasher = (v: any) => {
     // return sha224.arrayBuffer(`${v}`);
-    return sha224(`${v}`);
+    return sha224(`${v}`).substring(0, 14);
 }
 const _ = require('lodash')
 const helper = require('./helper');
@@ -97,6 +97,18 @@ export function getHashedTree(thing: any) : {| hash: hash, val: tree |} {
     }
 }
 
+export function _compactTree(node) {
+    let children = getChildren(node);
+    let x = [
+        hexToArrayBuffer(node[HASH])
+    ];
+    if(children.length > 0) x.push(children.map(_compactTree));
+    return x;
+}
+
+export function compactTree(tree) {
+    return msgpack.encode(_compactTree(tree));
+}
 
 export function parse(src, range: bool) {
     return esprima.parse(src, { range })
@@ -107,6 +119,7 @@ export const HashTree = Symbol('HashTree');
 export const Ast = Symbol('Ast');
 export const Diffs = Symbol('Diffs');
 export const BinDiffs = Symbol('BinDiffs');
+export const Stats = Symbol("Stats");
 
 
 export function getCommonChunks(tree1, tree2) {
@@ -209,27 +222,26 @@ export function compactDiff(diff) {
 
 // export function decodeDiff(diff) {}
 
+function getChildren(node: tree) : tree[] {
+    let children: tree[] = [];
+    switch(getType(node)) {
+        case 'Object':
+        case 'Array':
+            children = (Object.values(node).filter((val: any) => {
+                var typ = getType(val);
+                if(typ == 'Object') return true;
+                if(typ == 'Array') {
+                    if(!helper.isArrayFullOfPrimitives(val)) return true;
+                }
+                return false;
+            }) : any[]);
+        default:
+            break;
+    }
+    return children;
+}
 
 function bfsVisit(n1: tree, visit: (n1: tree) => boolean) {
-    function getChildren(node: tree) : tree[] {
-        let children: tree[] = [];
-        switch(getType(node)) {
-            case 'Object':
-            case 'Array':
-                children = (Object.values(node).filter((val: any) => {
-                    var typ = getType(val);
-                    if(typ == 'Object') return true;
-                    if(typ == 'Array') {
-                        if(!helper.isArrayFullOfPrimitives(val)) return true;
-                    }
-                    return false;
-                }) : any[]);
-            default:
-                break;
-        }
-        return children;
-    }
-
     if(visit(n1)) {
         getChildren(n1).map(child => bfsVisit(child, visit))
     }

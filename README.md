@@ -14,3 +14,6 @@ npm run build
 ```
 
 Take a look in `dist/output` for the details of what the hash tree, the diff format, and the bin diff looks like.
+
+
+## Envelope calculations

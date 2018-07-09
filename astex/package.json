@@ -8,6 +8,7 @@
     "dist"
   ],
   "dependencies": {
+    "compressjs": "^1.0.3",
     "deep-diff": "^1.0.1",
     "deep-object-diff": "^1.1.0",
     "esprima": "^4.0.0",
