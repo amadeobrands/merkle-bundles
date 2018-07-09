@@ -1,0 +1,6 @@
+.vscode/
+node_modules
+astex/node_modules/**
+astex/dist
+react-webpack-babel/node_modules
+webpack/node_modules
