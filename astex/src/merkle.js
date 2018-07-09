@@ -3,18 +3,24 @@ var getType = require('get-object-type');
 const esprima = require('esprima');
 const recast = require("recast");
 const sha224 = require('js-sha256').sha224;
-const hasher = (v) => {
+const hasher = (v: any) => {
     return sha224(`${v}`);
 }
+const _ = require('lodash')
 
 
 const helper = require('./helper');
 
-function isArrayFullOfPrimitives(arr) {
+function isArrayFullOfPrimitives(arr: any[]) {
     for(let item of arr) {
-        if(getType(item) === 'Object') return false;
+        let typ = getType(item);
+        if(typ === 'Object') return false;
     }
     return true;
+}
+
+function isAnArrayAtTheEndOfTheDay(arr) {
+    return arr.__proto__.constructor.name === 'Array';
 }
 
 // tree
@@ -44,43 +50,62 @@ function isArrayFullOfPrimitives(arr) {
 // const HASH = Symbol("Hash");
 export const HASH = '_hash'
 
-function hashSubtrees(subtrees) {
+type hash = string;
+
+type tree = {
+    [x: string]: tree | any,
+    _hash: hash,
+};
+
+function hashSubtrees(subtrees) : hash {
     return hasher( subtrees.map(({ hash }) => hash).join('') );
 }
-export function getHashedTree(thing) {
-    // if value is object- return hash of all entries' hashes
-    // if value is array- return hash of all items hashes
-    // if value is primitive- return hash of value
 
-    // if we are an object- set the _hash prop on the object
-    // else just return the hash
+const ignoredKeys = ['range'];
 
+
+const getKeyVals = (obj) => {
+    return Object.entries(obj).map(entry => {
+        return {
+            k: entry[0],
+            v: entry[1]
+        }
+    })
+}
+
+export function getHashedTree(thing: any) : {| hash: hash, val: tree |} {
     let typ = getType(thing);
 
-    // two things:
-    // recurse until we have a primitive value
-    // hash is only set on objects
-    // hash is = hash(items for an array | keys for an object | val for a primitive)
-    // return the subtrees with their hashes too
     if(typ == 'Object') {
-        let subtrees = Object.entries(thing).map(entry => {
-            let [k,v] = entry;
+        let kvs = getKeyVals(thing);
+        let ignoredEntries = kvs.filter(({ k }) => {
+            return _.includes(ignoredKeys, k);
+        })
+        let entriesToHash = kvs.filter(({ k }) => {
+            return !_.includes(ignoredKeys, k);
+        })
+
+        let subtrees = entriesToHash.map(({ k, v }) => {
             let { hash, val } = getHashedTree(v);
             return { k, hash, val };
         })
 
-        let newObj = {};
+        let hash = hashSubtrees(subtrees);
+        let newObj: tree = {
+            _hash: hash,
+        };
+        ignoredEntries.map(({ k, v }) => {
+            newObj[k] = v;
+        })
         subtrees.map(({ k, val }) => {
             newObj[k] = val;
         })
-
-        let hash = hashSubtrees(subtrees)
-        newObj[HASH] = hash;
 
         return {
             hash,
             val: newObj,
         }
+
     } else if (typ == 'Array') {
         if(isArrayFullOfPrimitives(thing)) {
             let val = thing;
@@ -111,14 +136,11 @@ export function getHashedTree(thing) {
                 val 
             }
         } catch(ex) {
-            return new Error(ex)
+            throw ex;
         }
     }
 }
 
-export function getHashedValue(thing) {
-
-}
 
 // Uses BFS
 // return true to recurse down
@@ -129,74 +151,43 @@ export function getHashedValue(thing) {
 // 	}
 // }
 
-export function hashNode(node) {
-    const serialise = (val) => JSON.stringify(val);
-    return hash(
-        serialise(node.value) + node.children.map(hashNode)
-    );
-}
-
-export class MerkleDiffer {
-    // treeB has ast node info in it.
-    // TODO better patterning
-    diff(treeA, treeB) {
-        let changes = [];
-
-        // This must be applied top-down, otherwise the ranges will be incorrect
-        // which stems from using n2 by default
-        function compareTree(n1, n2) {
-            if(hashNode(n1) !== hashNode(n2)) {
-               let [ start, end ] = n2.range;
-               changes.push({ start, end })
-               return;
-               // don't recurse further.
-            }
-
-            for(let i = 0; i < Math.min(n1.children.length, n2.children.length); i++) {
-                compareTree(n1.children[i], n2.children[i])
-            }
-        }
-
-        compareTree(treeA, treeB);
-
-        return changes;
-    }
-}
-
-
-
-
-// export function getDiffs(tree, currentSrc) {
-//     let ast = parse(currentSrc, false);
-//     let astWithRangeInfo = parse(currentSrc, true);
-//     let currentTree = makeTree(ast);
-
-//     function treediff(a, b) {
-//         // recurse and visit all children
-//         // unless there is a difference in hashes, in which case
-//     }
-    // for every differing node, get the node from the AST
-    // get the location info and add that in
-
-    // problem? what about loc info? 
-    // the tree is simply a compact representation of the code
-    // which we can use to determine how our code differs with the client
-    // if we knew the exact value of each node, we could send a diff rather than the content
-
-    // we also have to be careful here with locations/positions
-    // let diff = treediff(tree, currentTree);
-    
-
-//     let changes = diff.nodes.map(node => {
-//         let { from, to } = module.tree.getRange(node)
-//         let diff = module.getCode(from, to);
-//         return { from, to, diff }
-//     })
-    
-//     return { id, changes }
+// export function hashNode(node: tree) {
+//     const serialise = (val) => JSON.stringify(val);
+//     return hash(
+//         serialise(node.value) + node.children.map(hashNode)
+//     );
 // }
 
-export function parse(src, range) {
+// export class MerkleDiffer {
+//     // treeB has ast node info in it.
+//     // TODO better patterning
+//     diff(treeA, treeB) {
+//         let changes = [];
+
+//         // This must be applied top-down, otherwise the ranges will be incorrect
+//         // which stems from using n2 by default
+//         function compareTree(n1, n2) {
+//             if(hashNode(n1) !== hashNode(n2)) {
+//                let [ start, end ] = n2.range;
+//                changes.push({ start, end })
+//                return;
+//                // don't recurse further.
+//             }
+
+//             for(let i = 0; i < Math.min(n1.children.length, n2.children.length); i++) {
+//                 compareTree(n1.children[i], n2.children[i])
+//             }
+//         }
+
+//         compareTree(treeA, treeB);
+
+//         return changes;
+//     }
+// }
+
+
+
+export function parse(src, range: bool) {
     return esprima.parse(src, { range })
 }
 
@@ -214,86 +205,93 @@ let example1 = readText('/test/example1.js')
 let example2 = readText('/test/example2.js')
 
 let clientAst = parse(example1, false);
-let clientTree = getHashedTree(clientAst);
+let clientTree = getHashedTree(clientAst).val;
 
-helper.log(HashTree, 'clientTree', clientTree.val)
+helper.log(HashTree, 'clientTree', clientTree)
 
 let serverAst = parse(example2, false);
 let serverAstLocations = parse(example2, true);
 let serverTree = getHashedTree(serverAst).val;
+
+helper.log(HashTree, 'merged', _.merge(serverAstLocations, serverTree));
+
 
 helper.log(HashTree, 'serverTree', serverTree);
 
 // get diff
 // basically get the leaf nodes where the parent has an unequal hash
 
-let diffs = getDiffs(clientTree, serverTree);
+
+let merged = _.merge(serverAstLocations, serverTree);
+// let diffs = getDiffs(clientTree, serverTree);
+// let diffs = getDiffs(clientTree, serverAstLocations);
+let diffs = getDiffs(clientTree, merged);
+
 helper.log(Diffs, 'diffs', diffs);
 
-function traverseTree(n1, n2, visit) {
-    let parent = n2;
-
-    function getChildren(node) {
-        let children = [];
+function traverseTree(n1: tree, n2: tree, visit: (n1: tree, n2: tree) => boolean) {
+    function getChildren(node: tree) : tree[] {
+        let children: tree[] = [];
         switch(getType(node)) {
             case 'Object':
-                children = Object.values(n2).filter(x => getType(x) === 'Object');
-                break;
             case 'Array':
-                if(!isArrayFullOfPrimitives(n2)) {
-                    children = n2;
-                }
+                children = (Object.values(node).filter((val: any) => {
+                    var typ = getType(val);
+                    if(typ == 'Object') return true;
+                    if(typ == 'Array') {
+                        if(!isArrayFullOfPrimitives(val)) return true;
+                    }
+                    return false;
+                }) : any[]);
             default:
                 break;
         }
         return children;
     }
 
-    let goDeeper = visit(n1, n2);
-    if(goDeeper) {
-        let childrens = [
-            getChildren(n1),
-            getChildren(n2),
-        ];
-        
-        for(let i = 0; i < Math.min(childrens[0].length, childrens[1].length); i++) {
-            traverseTree(childrens[0][i], childrens[1][i], (z1, z2) => visit(z1, z2, parent))
+    if(
+        n2[HASH] === (n1 && n1[HASH])
+    ) return;
+
+    let childrens = [
+        getChildren(n1),
+        getChildren(n2),
+    ];
+    // let numChildren = Math.min(childrens[0].length, childrens[1].length);
+
+    let numChildren = childrens[1].length;
+    if(numChildren == 0) {
+        // leaf node
+        visit(n1, n2)
+
+    } else {
+        let parent = n2;
+
+        for(let i = 0; i < numChildren; i++) {
+            let a = childrens[0][i];
+            let b = childrens[1][i];
+            traverseTree(a, b, visit)
         }
     }
+    
+    
 }
 
 
-
-// if the hashes are not equal
-
-
-/*
-
-hash: G
-a [
-    { hash: X,
-        b: [
-        asd,
-        asd,
-    ] },
-
-    { hash: B,
-        b: [
-        asd,
-        asd,
-    ] }
-]
-
-*/
-function getDiffs(a, b) {
+function getDiffs(a: tree, b: tree) {
     let diffs = [];
 
-    traverseTree(a, b, (n1, n2, parent) => {
-        if(n1[HASH] !== n2[HASH]) {
-            return true;
-        }
-        diffs.push( parent );
-        return false;
+    traverseTree(a, b, (n1, n2, path) => {
+        diffs.push(n2);
+
+        return true;
+
+        // iterate through the n2 tree
+        // leaf node = node.children === 0
+        // if node.hash != current.hash: log node
+        // 
+        // iterate down where hash is different
+
     })
     return diffs;
 }

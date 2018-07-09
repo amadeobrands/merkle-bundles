@@ -6,17 +6,13 @@ import { HASH } from './merkle';
 
 export function log(type, name, content) {
     let x = JSON.stringify(content, (k, v) => {
-        if(v instanceof Array) {
+        if(v instanceof Array && v.hasOwnProperty(HASH)) {
             let newObj = {};
             v.map((v, i) => {
                 newObj[i] = v;
             })
             newObj[HASH] = v[HASH];
             return newObj;
-            // console.log(v)
-            // return Object.assign(v.map((v, i) => {
-            //     return { [i]: v }
-            // }), { [HASH]: v[HASH] })
         } else return v;
     }, 1);
 

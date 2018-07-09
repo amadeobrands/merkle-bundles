@@ -13,12 +13,17 @@
     "esprima": "^4.0.0",
     "get-object-type": "0.0.2",
     "js-sha256": "^0.9.0",
+    "json-diff": "^0.5.2",
+    "lodash": "^4.17.10",
+    "minimal-object-diff": "^0.1.0",
     "recast": "^0.15.0",
     "symbol-description": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.76.0",
     "mocha": "^5.2.0"
   }
 }
