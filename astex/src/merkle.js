@@ -1,4 +1,4 @@
-// @flow
+// @flowx
 var getType = require('get-object-type');
 const esprima = require('esprima');
 const recast = require("recast");
@@ -49,6 +49,7 @@ function isAnArrayAtTheEndOfTheDay(arr) {
 
 // const HASH = Symbol("Hash");
 export const HASH = '_hash'
+export const SHALLOWHASH = '_shallowHash';
 
 type hash = string;
 
@@ -205,6 +206,7 @@ let example1 = readText('/test/example1.js')
 let example2 = readText('/test/example2.js')
 
 let clientAst = parse(example1, false);
+let clientAstLocations = parse(example1, true);
 let clientTree = getHashedTree(clientAst).val;
 
 helper.log(HashTree, 'clientTree', clientTree)
@@ -218,16 +220,129 @@ helper.log(HashTree, 'merged', _.merge(serverAstLocations, serverTree));
 
 helper.log(HashTree, 'serverTree', serverTree);
 
-// get diff
-// basically get the leaf nodes where the parent has an unequal hash
-
 
 let merged = _.merge(serverAstLocations, serverTree);
 // let diffs = getDiffs(clientTree, serverTree);
 // let diffs = getDiffs(clientTree, serverAstLocations);
 let diffs = getDiffs(clientTree, merged);
 
+function getChunks(tree) {
+    let chunks = new Set();
+    bfsVisit(tree, (node) => {
+        chunks.add(node[HASH]);
+        return true
+    })
+    return chunks
+}
+
+let clientChunks = getChunks(clientTree);
+let serverChunks = getChunks(serverTree);
+let intersection = new Set(
+    [...clientChunks].filter(x => serverChunks.has(x)))
+
+
+function buildDiff(treeWithLocs, commonChunks) {
+    let src = recast.print(treeWithLocs).code;
+    let chunks = [];
+
+    bfsVisit(treeWithLocs, (node) => {
+        let id = node[HASH];
+        
+        if(commonChunks.has(id)) {
+            let [from, to] = node.range;
+            // src.replaceWithChunk();
+            chunks.push({ from, to, id })
+            return false
+        }
+
+        return true;
+    });
+
+    let sorted = _.sortBy(chunks, [function(o) { return o.from; }]);
+    console.log(sorted)
+
+    const chunkId = (id) => _.findIndex(sorted, { id });
+
+    let g = sorted
+    .reduce((prev, curr) => {
+        let before = prev[prev.length - 1];
+
+        return [
+            ...prev,
+            Object.assign(curr, {
+                prevTo: (before && before.to) || 0
+            })
+        ]
+    }, [])
+    .reduce((prev, curr) => {
+        return [
+            ...prev,
+            src.substring(curr.prevTo, curr.from),
+            chunkId(curr.id),
+        ]
+    }, [])
+
+
+    return {
+        chunks: sorted.map(chunk => chunk.id),
+        diff: g
+    }
+}
+
+// console.log(intersection)
+let diff = buildDiff(merged, intersection);
 helper.log(Diffs, 'diffs', diffs);
+console.log(diff)
+
+function applyDiff(treeWithLocs, diff) {
+    let src = recast.print(treeWithLocs).code;
+
+    let chunkLookup: { [hash]: number[] } = {};
+    bfsVisit(treeWithLocs, node => {
+        chunkLookup[node[HASH]] = node.range;
+        return true;
+    });
+
+    let newSrc = diff.diff.map(x => {
+        if(getType(x) == 'String') return x;
+        else {
+            let id = diff.chunks[x];
+            let [ from, to ] = chunkLookup[id];
+            return src.substring(from, to);
+        }
+    }).join('')
+    
+    return newSrc;
+}
+
+
+console.log(applyDiff(_.merge(clientAstLocations, clientTree), diff))
+
+
+function bfsVisit(n1: tree, visit: (n1: tree) => boolean) {
+    function getChildren(node: tree) : tree[] {
+        let children: tree[] = [];
+        switch(getType(node)) {
+            case 'Object':
+            case 'Array':
+                children = (Object.values(node).filter((val: any) => {
+                    var typ = getType(val);
+                    if(typ == 'Object') return true;
+                    if(typ == 'Array') {
+                        if(!isArrayFullOfPrimitives(val)) return true;
+                    }
+                    return false;
+                }) : any[]);
+            default:
+                break;
+        }
+        return children;
+    }
+
+    if(visit(n1)) {
+        getChildren(n1).map(child => bfsVisit(child, visit))
+    }
+}
 
 function traverseTree(n1: tree, n2: tree, visit: (n1: tree, n2: tree) => boolean) {
     function getChildren(node: tree) : tree[] {
@@ -273,9 +388,9 @@ function traverseTree(n1: tree, n2: tree, visit: (n1: tree, n2: tree) => boolean
             traverseTree(a, b, visit)
         }
     }
-    
-    
 }
+
+
 
 
 function getDiffs(a: tree, b: tree) {
