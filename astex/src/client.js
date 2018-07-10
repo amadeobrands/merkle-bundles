@@ -1,61 +1,69 @@
+
+const msgpack = require("msgpack-lite");
 import * as qwest from 'qwest';
 import localforage from 'localforage';
+import _ from 'lodash';
+import {
+    applyDiff,
+    parse,
+} from './merkle';
+
+localforage.config({
+    storeName: 'merkleAstBundles',
+})
 
 class Client {
+    lookup = {};
+
     constructor(endpoint) {
         this.endpoint = endpoint;
-
-        localforage.setItem('key', 'value').then(function () {
-            return localforage.getItem('key');
-          }).then(function (value) {
-            // we got our value
-          }).catch(function (err) {
-            // we got an error
-          });
-    }
-
-    getBundle(name) {
-        qwest.get(`this.endpoint/${name}`, data, { dataType: 'arraybuffer', responseType: 'arraybuffer' })
-        .then((xhr, response) => {
-            
-        })
-        .catch(function(e, xhr, response) {
-            // Process the error
-        })
-        .complete(function() {
-            // Always run
+        localforage.getItem('lookup').then(lookup => {
+            this.lookup = lookup;
         });
     }
+
+    getBundle(bundleFilename) {
+        let dfd = new Promise();
+
+        let info = this.lookup[bundleFilename];
+        let root = (info && info.tree.hash) || 0;
+
+        qwest.get(
+            `${this.endpoint}/${bundleFilename}/by-root/${root}`,  
+            { dataType: 'arraybuffer', responseType: 'arraybuffer' 
+        })
+        .then((xhr, res) => {
+            // console.log(response)
+            res = msgpack.decode(res);
+
+            let src;
+
+            if(!info) {
+                src = res.diff;
+            } else {
+                let { tree } = info;
+                src = applyDiff(tree.val, res);
+            }
+
+            // build new tree
+
+            let ast = parse(src, false);
+            let astLocations = parse(src, true);
+            let tree = getHashedTree(ast);
+            
+            let newInfo = {
+                src,
+                tree: {
+                    ...tree,
+                    val: _.merge(astLocations, tree.val)
+                }
+            }
+            this.lookup[bundleFilename] = newInfo;
+            localforage.setItem('lookup', this.lookup);
+
+            dfd.resolve(src);
+        })
+
+        return dfd;
+    }
 }
-
-// handle('/bundle', (req, res) => {
-//     let trees = req.trees;
-//     let changeset = trees.map((id, tree) => {
-//         let module = modules[id];
-
-//         let diff = treediff(module.tree, tree);
-//         let changes = diff.nodes.map(node => {
-//             let { from, to } = module.tree.getRange(node)
-//             let diff = module.getCode(from, to);
-//             return { from, to, diff }
-//         })
-
-//         return { id, changes }
-//     })
-
-//     res.send(changeset)
-
-
-
-
-
-
-// // GET /
-// tree = localStorage.get('tree') || {};
-
-// fetch('/bundle', { tree })
-// .then(res => {
-//     tree.merge(res.changes)
-//     webpackBootstrap(tree.modules())
-// })
-
