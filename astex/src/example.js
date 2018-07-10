@@ -48,7 +48,7 @@ helper.log(HashTree, 'serverTree', serverTree);
 let serverTreeLocs = _.merge(serverAstLocations, serverTree);
 
 let commonChunks = getCommonChunks(clientTree, serverTreeLocs);
-let diff = buildDiff(serverTreeLocs, commonChunks);
+let diff = buildDiff(example2, serverTreeLocs, commonChunks);
 helper.log(Diffs, 'diff', diff);
 
 let bindiff = compactDiff(diff)

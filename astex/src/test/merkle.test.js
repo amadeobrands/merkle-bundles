@@ -17,8 +17,6 @@ const merkle = require('../merkle');
 describe('loads src into a tree', () => {
     let ast1 = merkle.parse(example1);
     let ast2 = merkle.parse(example2);
-
-    
 })
 
 

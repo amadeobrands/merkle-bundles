@@ -128,7 +128,9 @@ export function getCommonChunks(tree1, tree2) {
     return new Set([...chunks1].filter(x => chunks2.has(x)))
 }
 
-function getChunks(tree) {
+
+
+export function getChunks(tree) {
     let chunks = new Set();
     bfsVisit(tree, (node) => {
         chunks.add(node[HASH]);
@@ -138,8 +140,14 @@ function getChunks(tree) {
 }
 
 
-export function buildDiff(treeWithLocs, commonChunks) {
-    let src = recast.print(treeWithLocs).code;
+export function buildDiff(src, treeWithLocs, commonChunks) {
+    if(commonChunks.size == 0) {
+        return {
+            diff: src,
+            chunks: []
+        }
+    }
+    // let src = recast.print(treeWithLocs).code;
     let chunks = [];
 
     bfsVisit(treeWithLocs, (node) => {
@@ -298,4 +306,3 @@ function traverseTree(n1: tree, n2: tree, visit: (n1: tree, n2: tree) => boolean
 //     diff() {
 //     }
 // }
-
