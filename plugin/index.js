@@ -1,52 +1,91 @@
 const fs = require('fs');
 const path = require('path');
 
-// const writeOriginalSource = (source, filename) => {
-//     // self.assets['bundle.js'].source()
-//     fs.writeFileSync(filename)
-// }
+const {
+	ConcatSource,
+	OriginalSource,
+	PrefixSource,
+	RawSource
+} = require("webpack-sources");
+
+
+
+// const merkleTreeAst = require('./astex/dist/client.js');
+let srcPath = path.resolve(__dirname + '/../astex/dist/client.js');
+let merkleTreeAstCode = fs.readFileSync(path.resolve(__dirname + '/../astex/dist/client.js'), { encoding: "utf-8"})
 
 class FoobarPlugin {
     constructor(options) {}
 
     apply(compiler) {
         compiler.hooks.compilation.tap("FoobarPlugin", compilation => {
-            compilation.hooks.record.tap("FoobarPlugin", self => {
-                compiler.plugin('emit', (compilation, cb) => {
-                    // debugger;
-                    let modules = Array.from(self.chunks[0]._modules);
+            let mainTempl = compilation.mainTemplate;
+            let modulesArr;
+            let id;
+            // return;
 
-                    modules.map(module => {
-                        if(!module._source) return;
-                        let source = module._source.source();
-                        let key = `module-${module.id}.js`;
+            mainTempl.hooks.render.intercept({
+                register: (tapInfo) => {
+                    return {
+                        ...tapInfo,
+                        fn: (bootstrapSource, chunk, hash, moduleTemplate, dependencyTemplates) => {
+                            
+                            const source = new ConcatSource();
+                            return source;
+                            
+                            source.add("/******/ (function(modules) { // webpackBootstrap\n");
+                            source.add(new PrefixSource("/******/", bootstrapSource));
+                            source.add("/******/ })\n");
+                            source.add(
+                                "/************************************************************************/\n"
+                            );
+                            source.add("/******/ (");
+                            source.add(
+                                // this.hooks.modules.call(
+                                //     new RawSource(""),
+                                //     chunk,
+                                //     hash,
+                                //     moduleTemplate,
+                                //     dependencyTemplates
+                                // )
+                            );
+                            source.add(")");
+                            return source;
 
-                        compilation.assets[key] = {
-                            source: function() {
-                                return source;
-                            },
-                            size: function() {
-                                return source.length;
-                            }
-                        };
-                    })
+                            // source.add(`(${merkleTreeAstCode})`)
+                            // source.add(merkleTreeAstCode)
 
-                    // Object.keys(self.assets).map(filename => {
-                    //     let src = self.assets[filename].source();
-                    //     let key = `chunk.${filename}`;
-                    //     compilation.assets[key] = {
-                    //         source: function() {
-                    //             return src;
-                    //         },
-                    //         size: function() {
-                    //             return src.length;
-                    //         }
-                    //     };
-                    // })
-                    
-                    cb();
-                });
+                            // console.log(source)
+
+                            // modulesArr = mainTempl.hooks.modules.call(
+                            //     new RawSource(""),
+                            //     chunk,
+                            //     hash,
+                            //     moduleTemplate,
+                            //     dependencyTemplates
+                            // );
+                            // id = chunk.hash;
+
+
+                            return source;
+                        }
+                    }
+                }
+            });
+
+            
+            compiler.plugin('emit', (compilation, cb) => {
+                let key = `${id}.js`;
+                compilation.assets[key] = {
+                    source: function() {
+                        return modulesArr;
+                    },
+                    size: function() {
+                        return modulesArr.length;
+                    }
+                }
             })
+
         })
     }
 }
