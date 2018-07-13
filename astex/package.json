@@ -3,6 +3,7 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register ./src/**/*.test.js",
     "build": "babel ./src --watch -d ./dist --ignore test.js",
+    "build-client": "webpack-cli ./webpack.config.js",
     "example": "npm run build && node dist/example.js"
   },
   "bin": {
@@ -13,6 +14,7 @@
   ],
   "dependencies": {
     "array-buffer-to-hex": "^1.0.0",
+    "babel-loader": "^7.1.5",
     "body-parser": "^1.18.3",
     "commander": "^2.16.0",
     "compressjs": "^1.0.3",
@@ -34,7 +36,9 @@
     "q": "^1.5.1",
     "qwest": "^4.5.0",
     "recast": "^0.15.0",
-    "symbol-description": "^1.0.0"
+    "symbol-description": "^1.0.0",
+    "webpack": "^4.16.0",
+    "webpack-cli": "^3.0.8"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

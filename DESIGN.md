@@ -1,3 +1,16 @@
+code sign the root of each update to the tree
+use that as proof somehow so you can bittorrent the source
+
+
+also
+
+send the hashes from the browser to the server
+the server sends back self-executing javascript that updates the cache
+(no bootstrap needed)
+
+
+
+
 old, new = trees
 cached = intersect(old.chunks, new.chunks)
 new = new.chunks - old.chunks;

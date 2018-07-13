@@ -12,7 +12,7 @@ localforage.config({
     storeName: 'merkleAstBundles',
 })
 
-class Client {
+export class Client {
     lookup = {};
 
     constructor(endpoint) {

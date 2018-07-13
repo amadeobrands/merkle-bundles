@@ -22,69 +22,70 @@ class FoobarPlugin {
             let mainTempl = compilation.mainTemplate;
             let modulesArr;
             let id;
-            // return;
 
-            mainTempl.hooks.render.intercept({
-                register: (tapInfo) => {
-                    return {
-                        ...tapInfo,
-                        fn: (bootstrapSource, chunk, hash, moduleTemplate, dependencyTemplates) => {
-                            
-                            const source = new ConcatSource();
-                            return source;
-                            
-                            source.add("/******/ (function(modules) { // webpackBootstrap\n");
-                            source.add(new PrefixSource("/******/", bootstrapSource));
-                            source.add("/******/ })\n");
-                            source.add(
-                                "/************************************************************************/\n"
-                            );
-                            source.add("/******/ (");
-                            source.add(
-                                // this.hooks.modules.call(
-                                //     new RawSource(""),
-                                //     chunk,
-                                //     hash,
-                                //     moduleTemplate,
-                                //     dependencyTemplates
-                                // )
-                            );
-                            source.add(")");
-                            return source;
+            mainTempl.hooks.render.tap("FoobarPlugin", (bootstrapSource, chunk, hash, moduleTemplate, dependencyTemplates) => {
+                const source = new ConcatSource();
+                // return source;
 
-                            // source.add(`(${merkleTreeAstCode})`)
-                            // source.add(merkleTreeAstCode)
+                source.add("/******/ (function(modules) { // webpackBootstrap\n");
+                source.add(new PrefixSource("/******/", bootstrapSource));
+                source.add("/******/ })\n");
+                source.add(
+                    "/************************************************************************/\n"
+                );
+                source.add("/******/ (");
+                source.add(
+                    // this.hooks.modules.call(
+                    //     new RawSource(""),
+                    //     chunk,
+                    //     hash,
+                    //     moduleTemplate,
+                    //     dependencyTemplates
+                    // )
+                );
+                source.add(")");
 
-                            // console.log(source)
+                // source.add(`(${merkleTreeAstCode})`)
+                // source.add(merkleTreeAstCode)
 
-                            // modulesArr = mainTempl.hooks.modules.call(
-                            //     new RawSource(""),
-                            //     chunk,
-                            //     hash,
-                            //     moduleTemplate,
-                            //     dependencyTemplates
-                            // );
-                            // id = chunk.hash;
+                // console.log(source)
 
+                // modulesArr = mainTempl.hooks.modules.call(
+                //     new RawSource(""),
+                //     chunk,
+                //     hash,
+                //     moduleTemplate,
+                //     dependencyTemplates
+                // );
+                // id = ;
 
-                            return source;
+                compiler.plugin('emit', (compilation, cb) => {
+                    let key = `${chunk.hash}.js`;
+                    compilation.assets[key] = {
+                        source: function() {
+                            return modulesArr;
+                        },
+                        size: function() {
+                            return modulesArr.length;
                         }
                     }
-                }
+                })
+
+                // return source;
             });
 
             
-            compiler.plugin('emit', (compilation, cb) => {
-                let key = `${id}.js`;
-                compilation.assets[key] = {
-                    source: function() {
-                        return modulesArr;
-                    },
-                    size: function() {
-                        return modulesArr.length;
-                    }
-                }
-            })
+            // compiler.plugin('emit', (compilation, cb) => {
+            //     let key = `${id}.js`;
+            //     compilation.assets[key] = {
+            //         source: function() {
+            //             return modulesArr;
+            //         },
+            //         size: function() {
+            //             return modulesArr.length;
+            //         }
+            //     }
+            // })
 
         })
     }
