@@ -2,18 +2,18 @@
 const msgpack = require("msgpack-lite");
 import * as qwest from 'qwest';
 import localforage from 'localforage';
-import _ from 'lodash';
+import merge from 'lodash.merge';
 import {
     applyDiff,
     parse,
-} from './merkle';
+} from '../merkle';
 
 localforage.config({
     storeName: 'merkleAstBundles',
 })
 
 export class Client {
-    lookup = {};
+    // lookup = {};
 
     constructor(endpoint) {
         this.endpoint = endpoint;
@@ -41,8 +41,8 @@ export class Client {
             if(!info) {
                 src = res.diff;
             } else {
-                let { tree } = info;
-                src = applyDiff(tree.val, res);
+                let { tree, src } = info;
+                src = applyDiff(src, res);
             }
 
             // build new tree
@@ -55,7 +55,7 @@ export class Client {
                 src,
                 tree: {
                     ...tree,
-                    val: _.merge(astLocations, tree.val)
+                    val: merge(astLocations, tree.val)
                 }
             }
             this.lookup[bundleFilename] = newInfo;

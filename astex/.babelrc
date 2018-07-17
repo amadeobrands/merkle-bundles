@@ -1,4 +1,8 @@
 {
-    "presets": ["env", "flow"]
+    "presets": ["env"],
+    "plugins": [
+        "transform-flow-strip-types",
+        ["babel-plugin-transform-class-properties", { "spec": true }],
+        "transform-object-rest-spread"
+    ]
 }
-  

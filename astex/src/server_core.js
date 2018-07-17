@@ -6,7 +6,7 @@ const msgpack = require("msgpack-lite");
 const glob = require("glob")
 
 import chokidar from 'chokidar';
-import _ from 'lodash';
+import merge from 'lodash.merge';
 import helper from './helper';
 import {
     parse,
@@ -68,7 +68,7 @@ function loadDataForBundle(bundleFilename) {
     }
 
     let hashedTree = getHashedTree(ast);
-    let tree = _.merge(astLocs, hashedTree.val);
+    let tree = merge(astLocs, hashedTree.val);
     let chunks = getChunks(tree);
 
     let data = { src: currentSrc, tree, chunks };

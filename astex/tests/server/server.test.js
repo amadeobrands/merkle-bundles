@@ -88,7 +88,7 @@ describe('handles bundles', function() {
 
                 assert.deepEqual(diff.chunks.map(arrayBufferToHex), [ '3c269449a9b275', '19abca412ed4e3', 'a10d55a9d473be' ]);
 
-                // applyDiff(_.merge(clientAstLocations, clientTree), diff);
+                // applyDiff(src, diff);
                 // assert.deepEqual(diff.chunks, []);
             })
         })

@@ -14,18 +14,22 @@ const {
 let srcPath = path.resolve(__dirname + '/../astex/dist/client.js');
 let merkleTreeAstCode = fs.readFileSync(path.resolve(__dirname + '/../astex/dist/client.js'), { encoding: "utf-8"})
 
+const NAME = "MerkleAstBundlePlugin";
 class FoobarPlugin {
     constructor(options) {}
 
     apply(compiler) {
-        compiler.hooks.compilation.tap("FoobarPlugin", compilation => {
-            let mainTempl = compilation.mainTemplate;
-            let modulesArr;
-            let id;
+        let outputs = [];
 
-            mainTempl.hooks.render.tap("FoobarPlugin", (bootstrapSource, chunk, hash, moduleTemplate, dependencyTemplates) => {
-                const source = new ConcatSource();
-                // return source;
+        compiler.hooks.compilation.tap(NAME, compilation => {
+            let mainTempl = compilation.mainTemplate;
+
+            const addOutput = (fname, content) => {
+                outputs.push({ fname: `merkleast-${fname}`, content })
+            }
+
+            mainTempl.hooks.render.tap(NAME, (bootstrapSource, chunk, hash, moduleTemplate, dependencyTemplates) => {
+                let source = new ConcatSource();
 
                 source.add("/******/ (function(modules) { // webpackBootstrap\n");
                 source.add(new PrefixSource("/******/", bootstrapSource));
@@ -45,48 +49,36 @@ class FoobarPlugin {
                 );
                 source.add(")");
 
-                // source.add(`(${merkleTreeAstCode})`)
-                // source.add(merkleTreeAstCode)
+                let modules = mainTempl.hooks.modules.call(
+                    new RawSource(""),
+                    chunk,
+                    hash,
+                    moduleTemplate,
+                    dependencyTemplates
+                );
 
-                // console.log(source)
+                addOutput(chunk.id, modules)
+                addOutput("swag", 'asdads')
+                
 
-                // modulesArr = mainTempl.hooks.modules.call(
-                //     new RawSource(""),
-                //     chunk,
-                //     hash,
-                //     moduleTemplate,
-                //     dependencyTemplates
-                // );
-                // id = ;
+                source.add(`(${merkleTreeAstCode})`)
 
-                compiler.plugin('emit', (compilation, cb) => {
-                    let key = `${chunk.hash}.js`;
-                    compilation.assets[key] = {
-                        source: function() {
-                            return modulesArr;
-                        },
-                        size: function() {
-                            return modulesArr.length;
-                        }
-                    }
-                })
-
-                // return source;
+                return source;
             });
 
-            
-            // compiler.plugin('emit', (compilation, cb) => {
-            //     let key = `${id}.js`;
-            //     compilation.assets[key] = {
-            //         source: function() {
-            //             return modulesArr;
-            //         },
-            //         size: function() {
-            //             return modulesArr.length;
-            //         }
-            //     }
-            // })
+        })
 
+        compiler.plugin('emit', (compilation, cb) => {
+            outputs.map(({ fname, content }) => {
+                compilation.assets[fname] = {
+                    source: function() {
+                        return content;
+                    },
+                    size: function() {
+                        return content.length;
+                    }
+                };
+            })
         })
     }
 }

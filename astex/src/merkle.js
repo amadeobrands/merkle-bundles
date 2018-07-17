@@ -1,14 +1,17 @@
 // @flowx
 var getType = require('get-object-type');
+// const recast = require("recast");
 const esprima = require('esprima');
-const recast = require("recast");
 const sha224 = require('js-sha256').sha224;
 const hexToArrayBuffer = require('hex-to-array-buffer')
 const hasher = (v: any) => {
     // return sha224.arrayBuffer(`${v}`);
     return sha224(`${v}`).substring(0, 14);
 }
-const _ = require('lodash')
+const includes = require('lodash.includes');
+const sortBy = require('lodash.sortby');
+const findIndex = require('lodash.findindex');
+
 const helper = require('./helper');
 
 
@@ -35,10 +38,10 @@ export function getHashedTree(thing: any) : {| hash: hash, val: tree |} {
     if(typ == 'Object') {
         let kvs = helper.getKeyVals(thing);
         let ignoredEntries = kvs.filter(({ k }) => {
-            return _.includes(ignoredKeys, k);
+            return includes(ignoredKeys, k);
         })
         let entriesToHash = kvs.filter(({ k }) => {
-            return !_.includes(ignoredKeys, k);
+            return !includes(ignoredKeys, k);
         })
 
         let subtrees = entriesToHash.map(({ k, v }) => {
@@ -111,6 +114,7 @@ export function compactTree(tree) {
 }
 
 export function parse(src, range: bool) {
+    // return recast.parse(src, { range })
     return esprima.parse(src, { range })
 }
 
@@ -162,9 +166,9 @@ export function buildDiff(src, treeWithLocs, commonChunks) {
         return true;
     });
 
-    let sorted = _.sortBy(chunks, [function(o) { return o.from; }]);
+    let sorted = sortBy(chunks, [function(o) { return o.from; }]);
 
-    const chunkId = (id) => _.findIndex(sorted, { id });
+    const chunkId = (id) => findIndex(sorted, { id });
 
     let g = sorted
     .reduce((prev, curr) => {
@@ -197,8 +201,9 @@ export function buildDiff(src, treeWithLocs, commonChunks) {
 }
 
 
-export function applyDiff(treeWithLocs, diff) {
-    let src = recast.print(treeWithLocs).code;
+export function applyDiff(src, diff) {
+    let treeWithLocs = parse(src, true);
+    // let src = recast.print(treeWithLocs).code;
 
     let chunkLookup: { [hash]: number[] } = {};
     bfsVisit(treeWithLocs, node => {
