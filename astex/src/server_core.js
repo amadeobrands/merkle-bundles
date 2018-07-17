@@ -89,7 +89,7 @@ export function generateDiff(bundleFilename, root) {
     return diff;
 }
 
-export function loadInitialModules(basePath) {
+export function loadInitialModules(basePath, watch=true) {
     core.basePath = basePath;
     let bundleFileGlob = path.join(core.basePath, "/*.js");
 
@@ -113,11 +113,13 @@ export function loadInitialModules(basePath) {
         // console.log(rootToChunks)
     })
 
-    chokidar.watch(bundleFileGlob).on('all', (event, fpath) => {
-        let base = getBundleFilename(fpath)
-        console.log(`reloading: ${base}`)
-        loadDataForBundle(base)
-    });
+    if(watch) {
+        chokidar.watch(bundleFileGlob).on('all', (event, fpath) => {
+            let base = getBundleFilename(fpath)
+            console.log(`reloading: ${base}`)
+            loadDataForBundle(base)
+        });
+    }
 
     return dfd.promise;
 }

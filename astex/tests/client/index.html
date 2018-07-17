@@ -3,6 +3,12 @@
         <script src="./../../dist/client/bundle.js"></script>
     </head>
     <body>
-        <script src="./bundle.js"></script>
+        <script>
+            document.onload = function() {
+                MerkleAstBundles.bootstrap().load([
+                    "/bundle.js"
+                ])
+            };
+        </script>
     </body>
 </html>

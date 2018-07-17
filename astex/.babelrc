@@ -1,7 +1,16 @@
 {
-    "presets": ["env"],
+    "presets": [
+        [
+          "env", {
+            "targets": {
+              "node": "current"
+            }
+          }
+        ]
+      ],
     "plugins": [
         "transform-flow-strip-types",
+        "transform-async-to-generator",
         ["babel-plugin-transform-class-properties", { "spec": true }],
         "transform-object-rest-spread"
     ]

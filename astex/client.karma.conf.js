@@ -1,19 +1,21 @@
 
 
 module.exports = config => {
-  const tests = "tests/*.test.js";
+  const tests = "tests/client/*.test.js";
 
   config.set({
     frameworks: ["mocha"],
     files: [
       {
         pattern: tests,
+        watched: true,
       },
     ],
     preprocessors: {
-      [tests]: ["webpack"],
+      [tests]: ["webpack", 'sourcemap'],
     },
     webpack: {
+      devtool: 'inline-source-map',
       module: {
         rules: [
           {
@@ -24,6 +26,5 @@ module.exports = config => {
         ],
       },
     },
-    singleRun: true,
   });
 };

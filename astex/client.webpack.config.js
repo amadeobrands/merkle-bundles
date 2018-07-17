@@ -16,6 +16,8 @@ module.exports = {
         path: path.resolve(__dirname, 'dist/client'),
         filename: 'bundle.js',
         publicPath: '/',
+        library: 'MerkleAstBundles',
+        libraryTarget: 'var'
     },
 
     node: {
