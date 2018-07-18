@@ -42,7 +42,7 @@ describe("code cache", () => {
 });
 
 const endpoint = "http://localhost:3000";
-const bundleName = 'example1.js';
+const bundleName = 'example2.js';
 
 describe("Bootstrapping", () => {
   let client;
@@ -56,12 +56,12 @@ describe("Bootstrapping", () => {
     assert.strictEqual(client.endpoint, endpoint)
   })
 
-  it('should load the bundle.js in full if it doesnt exist', async () => {
+  it(`should load the ${bundleName} in full if it doesnt exist`, async () => {
     client = await bootstrap(endpoint);
     assert.strictEqual(await client.hasCachedBundle(bundleName), false); 
     let bundle = await client.load(bundleName);
     assert.notStrictEqual(bundle, null);
     assert.strictEqual(await client.hasCachedBundle(bundleName), true);
-    assert.strictEqual(bundle.src, bundleA);
+    assert.strictEqual(bundle.src, bundleB);
   });
 });

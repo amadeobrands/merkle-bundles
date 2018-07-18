@@ -22,6 +22,7 @@ import Q from 'q';
 class MyEmitter extends EventEmitter {}
 export const events = new MyEmitter();
 
+const ENV = process.env.NODE_ENV;
 
 
 let core = {
@@ -99,26 +100,26 @@ export function loadInitialModules(basePath, watch=true) {
 
     let dfd = new Q.defer();
 
-    glob(bundleFileGlob, null, (err, files) => {
-        if(err) throw err;
-        console.log(`Loading ${files.length} bundles`);
-        files.map(fpath => {
-            let base = getBundleFilename(fpath)
-            console.log(`loading: ${base}`)
-            loadDataForBundle(base)
-        })
-        // console.log(cache['example1.js'])
-        
-        dfd.resolve();
-        // console.log(rootToChunks)
-    })
-
     if(watch) {
         chokidar.watch(bundleFileGlob).on('all', (event, fpath) => {
             let base = getBundleFilename(fpath)
             console.log(`reloading: ${base}`)
             loadDataForBundle(base)
         });
+    } else {
+        glob(bundleFileGlob, null, (err, files) => {
+            if(err) throw err;
+            console.log(`Loading ${files.length} bundles`);
+            files.map(fpath => {
+                let base = getBundleFilename(fpath)
+                console.log(`loading: ${base}`)
+                loadDataForBundle(base)
+            })
+            // console.log(cache['example1.js'])
+            
+            dfd.resolve();
+            // console.log(rootToChunks)
+        })
     }
 
     return dfd.promise;

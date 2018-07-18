@@ -68,5 +68,8 @@ if (require.main === module) {
     })
 
 } else {
-    module.exports = app;
+    module.exports = async (basePath, watch=true) => {
+        await loadInitialModules(basePath, watch);
+        return app;
+    }
 }
