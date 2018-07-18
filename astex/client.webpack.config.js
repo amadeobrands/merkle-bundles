@@ -1,28 +1,18 @@
 // For the client-library
 const path = require('path');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const merge = require('lodash.merge');
 
+let mode = process.env.NODE_ENV == 'development' ? 'development' : 'production';
 
-let mode = 'production';
-
-module.exports = {
+const base = {
     mode,
 
     context: path.join(__dirname, 'src'),
 
-    entry: './client/index',
-    
-	output: {
-        path: path.resolve(__dirname, 'dist/client'),
-        filename: 'bundle.js',
-        publicPath: '/',
-        library: 'MerkleAstBundles',
-        libraryTarget: 'var'
-    },
-
     node: {
         fs: "empty"
-     },
+    },  
 
     plugins: [
         mode == 'production' ? () => {} : new BundleAnalyzerPlugin()
@@ -37,4 +27,36 @@ module.exports = {
             }
         ]
     },
-};
+
+    output: {
+        path: path.resolve(__dirname, 'dist/client'),
+        publicPath: '/',
+    },
+}
+
+const bundle = merge({}, base, {
+    entry: './client/index',
+    
+	output: {
+        filename: 'bundle.js',
+        libraryTarget: 'window',
+        // libraryExport: "default",
+        library: 'MerkleAstBundleClient',
+    }
+});
+
+const bootstrap = merge({}, base, {
+    entry: './client/bootstrap',
+    
+	output: {
+        filename: 'bootstrap.js',
+        library: 'MerkleAstBundles',
+        libraryTarget: 'var'
+    }
+});
+
+// console.log(bootstrap, bundle)
+module.exports = [
+    bundle, 
+    bootstrap
+];

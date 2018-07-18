@@ -1,14 +1,3 @@
-
-
-// import { dirname } from 'path';
-
-// const request = require('supertest');
-// const assert = require('assert');
-// const path = require('path');
-// const msgpack = require("msgpack-lite");
-// const fs = require('fs');
-// const arrayBufferToHex = require('array-buffer-to-hex')
-
 import {
   set,
   get
@@ -19,13 +8,23 @@ import {
   latestBootstrapLoaded,
   bootstrap
 } from '../../src/client/bootstrap';
+import '../../src/client/index';
+
+
+import {
+} from '../../src/merkle';
 
 const assert = require("assert");
 
-const bundleA = require('raw-loader!../example1.js');
-const bundleB = require('raw-loader!../example2.js');
 
-beforeEach(async () => {
+// Helper
+// Since this test runs in browser, we can't just use fs.readFile.
+// raw-loader automatically adds 'use strict' to the top of imports.
+// So we need to strip these for comparison purposes later on.
+const bundleA = require('raw-loader!../example1.js').split(`"use strict";\n\n`)[1];
+const bundleB = require('raw-loader!../example2.js').split(`"use strict";\n\n`)[1];
+
+before(async () => {
   await localforage.clear();
 })
 
@@ -42,18 +41,27 @@ describe("code cache", () => {
   });
 });
 
-describe("Example page", () => {
+const endpoint = "http://localhost:3000";
+const bundleName = 'example1.js';
+
+describe("Bootstrapping", () => {
+  let client;
   it("should load the bootstrap code from the server if it doesn't exist", async () => {
     assert.strictEqual(await latestBootstrapLoaded(), false);
-    await bootstrap("http://localhost:3000");
+    client = await bootstrap(endpoint);
     assert.strictEqual(await latestBootstrapLoaded(), true);
   });
 
-  // it("should request a bundle from the server if it doesnt exist", () => {
-  //   let bundleName = 'bundle.js';
+  it("should return the client from bootstrap()", async () => {
+    assert.strictEqual(client.endpoint, endpoint)
+  })
 
-
-  //   // console.log(MerkleAstBundles)
-
-  // })
+  it('should load the bundle.js in full if it doesnt exist', async () => {
+    client = await bootstrap(endpoint);
+    assert.strictEqual(await client.hasCachedBundle(bundleName), false); 
+    let bundle = await client.load(bundleName);
+    assert.notStrictEqual(bundle, null);
+    assert.strictEqual(await client.hasCachedBundle(bundleName), true);
+    assert.strictEqual(bundle.src, bundleA);
+  });
 });

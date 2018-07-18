@@ -1,69 +1,77 @@
 
-const msgpack = require("msgpack-lite");
-import * as qwest from 'qwest';
-import localforage from 'localforage';
+// const msgpack = require("msgpack-lite");
+import {
+    decode
+} from '../coding';
+
+import {
+    get,
+    set
+} from './codecache';
 import merge from 'lodash.merge';
+import {ajaxGet} from './helpers';
+
 import {
     applyDiff,
     parse,
+    getHashedTree,
 } from '../merkle';
 
-localforage.config({
-    storeName: 'merkleAstBundles',
-})
-
-export class Client {
-    // lookup = {};
-
-    constructor(endpoint) {
-        this.endpoint = endpoint;
-        localforage.getItem('lookup').then(lookup => {
-            this.lookup = lookup;
-        });
+class Bundle {
+    get root () {
+        return this.tree.root;
     }
 
-    getBundle(bundleFilename) {
-        let dfd = new Promise();
+    constructor(src) {
+        this.src = src;
+        let ast = parse(src, false);
+        let astLocations = parse(src, true);
+        let tree = getHashedTree(ast);
 
-        let info = this.lookup[bundleFilename];
-        let root = (info && info.tree.hash) || 0;
+        this.tree = merge(astLocations, tree.val);
+    }
+}
 
-        qwest.get(
-            `${this.endpoint}/${bundleFilename}/by-root/${root}`,  
-            { dataType: 'arraybuffer', responseType: 'arraybuffer' 
-        })
-        .then((xhr, res) => {
-            // console.log(response)
-            res = msgpack.decode(res);
+module.exports = class MerkleBundleAstClient {
+    constructor(endpoint) {
+        this.endpoint = endpoint;
+    }
 
-            let src;
+    async hasCachedBundle(bundleName) {
+        let bundle = await get(bundleName);
+        return bundle !== null;
+    }
 
-            if(!info) {
-                src = res.diff;
-            } else {
-                let { tree, src } = info;
-                src = applyDiff(src, res);
-            }
+    async load(bundleName, userOpts) {
+        let opts = merge(
+            {
+                exec: true
+            },
+            userOpts
+        )
 
-            // build new tree
+        let bundle = await get(bundleName);
+        if(!bundle) {
+            bundle = new Bundle('');
+        }
+        
+        try {
+            let res = await ajaxGet(
+                `${this.endpoint}/bundle-diffs/${bundleName}/by-root/${bundle.root}`,  
+                { responseType: 'arraybuffer', async: true }
+            );
 
-            let ast = parse(src, false);
-            let astLocations = parse(src, true);
-            let tree = getHashedTree(ast);
-            
-            let newInfo = {
-                src,
-                tree: {
-                    ...tree,
-                    val: merge(astLocations, tree.val)
-                }
-            }
-            this.lookup[bundleFilename] = newInfo;
-            localforage.setItem('lookup', this.lookup);
+            res = decode(res);
 
-            dfd.resolve(src);
-        })
+            let src = applyDiff(bundle.src, res);
+            bundle = new Bundle(src);
+            await set(bundleName, bundle)
+            return bundle;
 
-        return dfd;
+        } catch(ex) {
+            throw ex;
+        }
+
+        return null;
     }
 }

@@ -2,7 +2,7 @@
 const fs = require("fs");
 const path = require('path');
 const EventEmitter = require('events');
-const msgpack = require("msgpack-lite");
+// const msgpack = require("msgpack-lite");
 const glob = require("glob")
 
 import chokidar from 'chokidar';

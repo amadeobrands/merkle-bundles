@@ -15,6 +15,11 @@ module.exports = config => {
       [tests]: ["webpack", 'sourcemap'],
     },
     webpack: {
+      mode: 'development',
+      stats: 'errors-only',
+      node: {
+          fs: "empty"
+      },
       devtool: 'inline-source-map',
       module: {
         rules: [

@@ -13,6 +13,7 @@ const sortBy = require('lodash.sortby');
 const findIndex = require('lodash.findindex');
 
 const helper = require('./helper');
+const coding = require('./coding');
 
 
 export const HASH = '_hash'
@@ -110,7 +111,7 @@ export function _compactTree(node) {
 }
 
 export function compactTree(tree) {
-    return msgpack.encode(_compactTree(tree));
+    return coding.encode(_compactTree(tree));
 }
 
 export function parse(src, range: bool) {
@@ -147,7 +148,7 @@ export function getChunks(tree) {
 export function buildDiff(src, treeWithLocs, commonChunks) {
     if(commonChunks.size == 0) {
         return {
-            diff: src,
+            diff: [src],
             chunks: []
         }
     }
@@ -223,13 +224,12 @@ export function applyDiff(src, diff) {
     return newSrc;
 }
 
-const msgpack = require("msgpack-lite");
 
 export function compactDiff(diff) {
     let val = Object.assign(diff, {
         chunks: diff.chunks.map(hexToArrayBuffer)
     })
-    var buffer = msgpack.encode(val);
+    var buffer = coding.encode(val);
     return buffer;
 }
 

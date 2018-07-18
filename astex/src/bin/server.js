@@ -23,10 +23,10 @@ app.get('/bundle-diffs/:id/by-root/:root', function (req, res) {
 })
 
 import { readText } from '../helper';
-const bootstrapSrc = readText('/client/bundle.js');
 
-app.get('/bootstrap', (req, res) => {
-    res.write(bootstrapSrc, 'utf-8')
+// const bundleSrc = readText('/client/bundle.js');
+app.get('/merkle-ast-client-bundle', (req, res) => {
+    res.write(readText('/client/bundle.js'), 'utf-8')
     res.end()
 })
 
