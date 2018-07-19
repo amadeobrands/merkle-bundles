@@ -3,7 +3,7 @@
   "scripts": {
     "test": "mocha --config ./server.mocha.config.js --compilers js:babel-core/register ./src/**/*.test.js",
     "test:client:unit": "./dist/bin/server.js -d tests/ | karma start client.karma.conf.js",
-    "test:integration": "mocha ./tests/e2e/index",
+    "test:integration": "webpack --config ./tests/e2e/page1/webpack.config.js && mocha ./tests/e2e/index",
     "build": "babel ./src -d ./dist --ignore test.js --ignore ./src/client/",
     "build-watch": "babel ./src --watch -d ./dist --ignore test.js client/",
     "build:client": "webpack --progress --watch --display-modules --config ./client.webpack.config.js"
@@ -46,6 +46,7 @@
     "q": "^1.5.1",
     "qwest": "^4.5.0",
     "recast": "^0.15.0",
+    "shelljs": "^0.8.2",
     "sinon": "^6.1.3",
     "symbol-description": "^1.0.0",
     "webpack": "^4.16.0",

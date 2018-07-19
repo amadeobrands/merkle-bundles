@@ -1,7 +1,9 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const shell = require('shelljs');
 
+const assert = require("assert");
 
 class Addr {
     constructor(host, port) {
@@ -21,12 +23,13 @@ let bundleServer;
 const bundleServerAddr = new Addr('localhost', 9002)
 
 const dir = path.resolve(__dirname, "./page1");
+console.log(dir)
 let browser, page;
 
 const setupBrowser = async () => {
     browser = await puppeteer.launch();
     page = await browser.newPage();
-    await page.setRequestInterception(true);
+    // await page.setRequestInterception(true);
 }
 
 const setupBundleServer = async () => {
@@ -63,6 +66,9 @@ before(async () => {
     console.log("Setup static web app server");
     await setupBrowser();
     console.log("Setup headless browser");
+
+    shell.cd(dir);
+    shell.rm('bundle.js')
 })
 
 after(async () => {
@@ -72,20 +78,41 @@ after(async () => {
         bundleServer.close(),
         webappServer.close()
     ];
+    
+    shell.cd(dir);
+    shell.rm('bundle.js')
 })
 
-describe('1st load of page', () => {
-    it('should request the bootstrap and bundle code', async () => {
-        
-        // Calling `done()` twice is an error
-        // setImmediate(done);        
+// TODO
+// describe('presetup', function() {
+//     it('should have generated the bundle', function() {
+//         assert(fs.existsSync(path.resolve(dir, './page1/dist/bundle.js')), true));
+//     })
+// })
 
-        // page.on('request', request => {
-        //     request.continue();
-        // });
-        await page.goto(webappServerAddr.url());
-        
-        return true;
+const bundlePath = path.join(dir, 'bundle.js');
+
+describe('1st load of page', function() {
+    before(() => {
+        fs.writeFileSync(bundlePath, fs.readFileSync(path.join(dir, '/example1.js')))
+    })
+
+    this.timeout(5000);
+    it('should request the bootstrap and bundle code', async () => {
+        let resources = [
+            "http://localhost:9001/dist/bootstrap.js",
+
+        ]
+        // response.fromCache()
+        page.on('pageerror', (x) => console.log(x))
+
+        page.on('response', async (response) => {
+            let buf = await response.buffer()
+            console.log(buf.toString().length)
+            console.log(response.request().url())
+        });
+        await page.goto(webappServerAddr.url(), { waitUntil: 'networkidle2' });
+        await page.waitForNavigation();
     });
 })
 
