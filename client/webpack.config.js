@@ -50,8 +50,8 @@ const bootstrap = merge({}, base, {
     
 	output: {
         filename: 'bootstrap.js',
-        library: 'MerkleAstBundles',
-        libraryTarget: 'var'
+        // library: 'MerkleAstBundles',
+        libraryTarget: 'commonjs'
     }
 });
 

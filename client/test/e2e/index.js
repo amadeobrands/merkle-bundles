@@ -178,7 +178,7 @@ describe('1st load of page', function() {
         await teardown();
     });
     
-    it.only('should request the bootstrap and bundle code', async () => {
+    it('should request the bootstrap and bundle code', async () => {
         let bootstrap = trackResponseLoaded(page, `${webappServerAddr.url()}/dist/bootstrap.js`).then(response => {
             assert(!response.fromCache());
             return Promise.resolve();
@@ -202,7 +202,7 @@ describe('1st load of page', function() {
         ]);
     });
 
-    it('should not request the bundle again', function(done) {
+    it.only('should not request the bundle again', function(done) {
         // this.timeout(0)
         // debugBrowser(done);
 
