@@ -214,19 +214,19 @@ export function applyDiff(src, diff) {
         if(!node[HASH]) return true;
         // let hash = hexToArrayBuffer(node[HASH]);
         let hash = node[HASH];
-        console.log(hash)
+        // console.log(hash)
         chunkLookup[hash] = node.range;
         return true;
     });
 
-    console.log(chunkLookup);
+    // console.log(chunkLookup);
 
     let newSrc = diff.diff.map(x => {
         if(getType(x) == 'String') return x;
         if(x === '') return '';
         else {
             let id = diff.chunks[x];
-            console.log(diff.chunks)
+            // console.log(diff.chunks)
             let [ from, to ] = chunkLookup[id];
             return src.substring(from, to);
         }

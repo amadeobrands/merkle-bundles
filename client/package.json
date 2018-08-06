@@ -33,6 +33,7 @@
     "karma": "^2.0.5",
     "mocha": "^5.2.0",
     "puppeteer": "^1.6.1",
+    "q": "^1.5.1",
     "shelljs": "^0.8.2",
     "static-server": "^2.2.1"
   }
