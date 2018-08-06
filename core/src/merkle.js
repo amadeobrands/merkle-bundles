@@ -12,7 +12,7 @@ const sortBy = require('lodash.sortby');
 const findIndex = require('lodash.findindex');
 
 const helper = require('./helper');
-const coding = require('./coding');
+const coding = require('coding');
 
 
 export const HASH = '_hash'
@@ -203,20 +203,30 @@ export function buildDiff(src, treeWithLocs, commonChunks) {
 
 
 export function applyDiff(src, diff) {
-    // console.log(diff)
+    console.log("Received diff: ", diff)
     let treeWithLocs = parse(src, true);
     // let src = recast.print(treeWithLocs).code;
 
     let chunkLookup = {};
-    bfsVisit(treeWithLocs, node => {
-        chunkLookup[node[HASH]] = node.range;
+    let hashTree = getHashedTree(treeWithLocs);
+
+    bfsVisit(hashTree, node => {
+        if(!node[HASH]) return true;
+        // let hash = hexToArrayBuffer(node[HASH]);
+        let hash = node[HASH];
+        console.log(hash)
+        chunkLookup[hash] = node.range;
         return true;
     });
 
+    console.log(chunkLookup);
+
     let newSrc = diff.diff.map(x => {
         if(getType(x) == 'String') return x;
+        if(x === '') return '';
         else {
             let id = diff.chunks[x];
+            console.log(diff.chunks)
             let [ from, to ] = chunkLookup[id];
             return src.substring(from, to);
         }
@@ -227,14 +237,13 @@ export function applyDiff(src, diff) {
 
 
 export function compactDiff(diff) {
-    let val = Object.assign(diff, {
-        chunks: diff.chunks.map(hexToArrayBuffer)
-    })
+    // let val = Object.assign(diff, {
+    //     chunks: diff.chunks.map(hexToArrayBuffer)
+    // })
+    let val = diff;
     var buffer = coding.encode(val);
     return buffer;
 }
-
-// export function decodeDiff(diff) {}
 
 function getChildren(node) {
     let children = [];

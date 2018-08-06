@@ -16,7 +16,7 @@ import {
     getChunks,
     buildDiff,
     compactDiff
-} from 'astex-core';
+} from 'astex-core/dist/bundle.node';
 
 import Q from 'q';
 
@@ -90,7 +90,7 @@ export function generateDiff(bundleFilename, root) {
     let commonChunks = new Set([...clientChunks].filter(x => chunks.has(x)));
     // console.log(commonChunks)
     let diff = buildDiff(src, tree, commonChunks);
-    console.log(diff)
+    console.log("Generated diff: ", diff)
     return compactDiff(diff);
 }
 

@@ -3,7 +3,7 @@ import {
     applyDiff,
     parse,
     getHashedTree,
-} from 'astex-core';
+} from 'astex-core/dist/bundle.web';
 
 import {
     get,

@@ -35,7 +35,6 @@ export async function bootstrap(endpoint) {
     }
 
     let x = eval(bundle);
-    console.log(x)
     client = window[CLIENT_GLOBAL_NAME].default;
     return new client(endpoint);
 }

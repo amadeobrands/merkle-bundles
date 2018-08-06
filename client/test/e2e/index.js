@@ -69,7 +69,7 @@ const setupBrowser = async () => {
     browser = await puppeteer.launch({
         headless: !DEBUG_BROWSER,
         args: ['--no-sandbox'],
-        userDataDir: '/tmp/merkle-bundle-puppeteer'
+        userDataDir: '/tmp/merkle-bundle-puppeteer' + new Date() // TODO HACK
     });
     page = await browser.newPage();
     page.on('console', msg => console.log('[console.log] ', msg.text()));
@@ -202,8 +202,9 @@ describe('1st load of page', function() {
         ]);
     });
 
+    this.timeout(0)
     it.only('should not request the bundle again', function(done) {
-        // this.timeout(0)
+        
         // debugBrowser(done);
 
         (async function() {
