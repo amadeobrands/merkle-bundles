@@ -2,6 +2,7 @@
   "name": "astex-server",
   "version": "1.0.0",
   "description": "",
+  "main": "dist/bundle.js",
   "bin": {
     "merkle-ast-serve": "./bin/merkle-ast-serve.js"
   },
@@ -9,12 +10,12 @@
     "test": "mocha --config ./server.mocha.config.js --compilers js:babel-core/register ./src/**/*.test.js",
     "build": "webpack --config webpack.config.js",
     "dev": "webpack --watch --config webpack.config.js",
-    "bin": "node ./dist/bundle.js"
+    "runbin": "./bin/merkle-ast-serve.js -d dist/"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "astex-core": "file:../core",
+    "astex-core": "../core",
     "body-parser": "^1.18.3",
     "chokidar": "^2.0.4",
     "cors": "^2.8.4",
@@ -27,6 +28,7 @@
     "webpack": "^4.16.3"
   },
   "devDependencies": {
+    "raw-loader": "^0.5.1",
     "webpack-cli": "^3.1.0",
     "webpack-node-externals": "^1.7.2"
   }

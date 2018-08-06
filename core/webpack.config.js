@@ -1,8 +1,8 @@
 const path = require('path');
 
 module.exports = {
-    target: 'node',
-    mode: 'development',
+  target: 'node',
+  mode: 'development',
   entry: './src/index.ts',
   module: { 
     rules: [
@@ -18,6 +18,7 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    libraryTarget: "commonjs2"
   }
 };

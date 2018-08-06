@@ -5,13 +5,14 @@ import {
 const path = require('path');
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser')
+// const bodyParser = require('body-parser')
 const cors = require("cors");
 
 app.use(cors())
 
 // If you're bigger than 10mb, gimme a call.
-app.use(bodyParser({limit: '10mb'}));
+// app.use(bodyParser({limit: '10mb'}));
+// app.use(bodyParser.json());
 
 app.get('/bundle-diffs/:id/by-root/:root', function (req, res) {
     let bundleFilename = req.params.id;
@@ -21,11 +22,10 @@ app.get('/bundle-diffs/:id/by-root/:root', function (req, res) {
     res.end(null, 'binary');
 })
 
-import { readText } from 'astex-core';
+const clientBundle = require('raw-loader!astex-client/dist/bundle');
 
-// const bundleSrc = readText('/client/bundle.js');
 app.get('/merkle-ast-client-bundle', (req, res) => {
-    res.write(readText('/client/bundle.js'), 'utf-8')
+    res.write(clientBundle, 'utf-8')
     res.end()
 })
 
@@ -66,7 +66,7 @@ export function command() {
     })
 }
 
-export default async function(basePath, watch=true) {
+export async function makeApp(basePath, watch=true) {
     await loadInitialModules(basePath, watch);
     return app;
 }

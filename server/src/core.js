@@ -66,7 +66,8 @@ function loadDataForBundle(bundleFilename) {
         ast = parse(currentSrc, false);
         astLocs = parse(currentSrc, true);
     } catch(ex) {
-        console.error(`Couldn't load ${bundleFilename} due to parsing errors`)
+        console.error(`Couldn't load ${bundleFilename} due to parsing errors:`)
+        console.error(ex)
         return;
     }
 
@@ -109,6 +110,7 @@ export function loadInitialModules(basePath, watch=true) {
             console.log(`reloading: ${base}`)
             loadDataForBundle(base)
         });
+        dfd.resolve();
     } else {
         glob(bundleFileGlob, null, (err, files) => {
             if(err) throw err;

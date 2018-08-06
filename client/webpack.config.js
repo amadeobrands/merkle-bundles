@@ -7,6 +7,8 @@ let mode = process.env.NODE_ENV == 'development' ? 'development' : 'production';
 const base = {
     mode,
 
+    target: 'web',
+
     context: path.join(__dirname, 'src'),
 
     node: {
@@ -28,7 +30,7 @@ const base = {
     },
 
     output: {
-        path: path.resolve(__dirname, 'dist/client'),
+        path: path.resolve(__dirname, 'dist'),
         publicPath: '/',
     },
 }

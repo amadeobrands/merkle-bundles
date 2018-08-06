@@ -36,5 +36,3 @@ export const getKeyVals = (obj) => {
         }
     })
 }
-
-export const readText = (f) => fs.readFileSync(__dirname + f, 'utf-8')

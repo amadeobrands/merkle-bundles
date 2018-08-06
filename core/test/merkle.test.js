@@ -1,9 +1,3 @@
-// node [hash=123 start=4 end=10]
-//     node [hash=412]
-
-// node [hash=121 start=4 end=22]
-//     node [hash=454]
-
 const assert = require('assert');
 const fs = require('fs');
 
@@ -18,6 +12,3 @@ describe('loads src into a tree', () => {
     let ast1 = merkle.parse(example1);
     let ast2 = merkle.parse(example2);
 })
-
-
-
