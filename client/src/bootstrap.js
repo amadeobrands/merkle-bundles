@@ -34,8 +34,9 @@ export async function bootstrap(endpoint) {
         console.log("Using cached bundle...")
     }
 
-    eval(bundle);
-    client = window[CLIENT_GLOBAL_NAME];
+    let x = eval(bundle);
+    console.log(x)
+    client = window[CLIENT_GLOBAL_NAME].default;
     return new client(endpoint);
 }
 

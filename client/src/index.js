@@ -23,7 +23,7 @@ class Bundle {
     }
 }
 
-export class MerkleBundleAstClient {
+export default class MerkleBundleAstClient {
     constructor(endpoint) {
         this.endpoint = endpoint;
     }

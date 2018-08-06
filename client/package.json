@@ -11,7 +11,8 @@
     "build": "webpack --config webpack.config.js",
     "dev": "webpack --watch --config webpack.config.js",
     "test:unit": "$(npm bin)/merkle-ast-serve -d tests/client/test-bundles/ | karma start client.karma.conf.js",
-    "test:e2e": "mocha ./test/e2e/index"
+    "test:e2e": "mocha ./test/e2e/index",
+    "test:e2e:build": "cd test/e2e/page1/ && webpack --config webpack.config.js"
   },
   "author": "",
   "license": "ISC",

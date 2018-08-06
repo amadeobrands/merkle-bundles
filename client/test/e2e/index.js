@@ -29,7 +29,7 @@ const webappServerAddr = new Addr('localhost', 9001)
 let bundleServer;
 const bundleServerAddr = new Addr('localhost', 9002)
 
-const dir = path.resolve(__dirname, "./page1");
+const dir = path.resolve(__dirname, "./page1/dist");
 console.log(`Loading E2E test in ${dir}`);
 
 
@@ -69,12 +69,12 @@ const setupBrowser = async () => {
     browser = await puppeteer.launch({
         headless: !DEBUG_BROWSER,
         args: ['--no-sandbox'],
-        // userDataDir: dir
+        userDataDir: '/tmp/merkle-bundle-puppeteer'
     });
     page = await browser.newPage();
     page.on('console', msg => console.log('[console.log] ', msg.text()));
     page.on('pageerror', (x) => console.log('[page error] ', x))
-    page.setRequestInterception(true);
+    // page.setRequestInterception(true);
     log(chalk.blue("Setup headless browser"));
 }
 
@@ -170,6 +170,7 @@ describe('1st load of page', function() {
 
     before(async function() {
         await setup();
+        log(chalk.blue("Setup complete!"));
         shell.cp('example1.js', 'bundle.js')
     })
     
@@ -177,7 +178,7 @@ describe('1st load of page', function() {
         await teardown();
     });
     
-    it('should request the bootstrap and bundle code', async () => {
+    it.only('should request the bootstrap and bundle code', async () => {
         let bootstrap = trackResponseLoaded(page, `${webappServerAddr.url()}/dist/bootstrap.js`).then(response => {
             assert(!response.fromCache());
             return Promise.resolve();
@@ -201,7 +202,7 @@ describe('1st load of page', function() {
         ]);
     });
 
-    it.only('should not request the bundle again', function(done) {
+    it('should not request the bundle again', function(done) {
         // this.timeout(0)
         // debugBrowser(done);
 

@@ -1,5 +1,5 @@
 
-const bootstrap = require('../../../src/client/bootstrap').bootstrap;
+const bootstrap = require('astex-client/dist/bootstrap').bootstrap;
 
 window.addEventListener('DOMContentLoaded', function() {
     // bootstrap('http://localhost:9002').load('bundle.js')

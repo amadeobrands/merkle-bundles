@@ -8,9 +8,7 @@ module.exports = {
 
     context: path.resolve(__dirname),
 
-    entry: {
-        app: './index.js'
-    },
+    entry: './src',
 
     module: {
         rules: [
@@ -23,7 +21,7 @@ module.exports = {
     },
 
     output: {
-        filename: 'bootstrap.js',
+        filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist/'),
         publicPath: '/',
     },
