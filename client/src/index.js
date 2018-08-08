@@ -1,9 +1,8 @@
 import {
     decode,
     applyDiff,
-    parse,
-    getHashedTree,
 } from 'astex-core/dist/bundle.web';
+import Bundle from './bundle';
 
 import {
     get,
@@ -12,16 +11,9 @@ import {
 import merge from 'lodash.merge';
 import {ajaxGet} from './helpers';
 
+import BundleProcessor from './BundleProcessor.worker';
 
-class Bundle {
-    constructor(src) {
-        this.src = src;
-        let ast = parse(src, false);
-        let astLocations = parse(src, true);
-        let tree = getHashedTree(ast);
-        this.tree = merge(astLocations, tree.val);
-    }
-}
+
 
 export default class MerkleBundleAstClient {
     constructor(endpoint) {
@@ -32,6 +24,8 @@ export default class MerkleBundleAstClient {
         let bundle = await get(bundleName);
         return bundle !== null;
     }
+
+    
 
     async load(bundleName, userOpts) {
         let opts = merge(
@@ -46,28 +40,33 @@ export default class MerkleBundleAstClient {
             if(!bundle) {
                 bundle = new Bundle('');
             }
-            // console.log(bundle)
             
+            // TODO
+            // since we set bundle above
+            // it will have a bundle.tree._hash
+            // could be confusing later down the line
+            // since it doesn't actually exist
             let res = await ajaxGet(
-                `${this.endpoint}/bundle-diffs/${bundleName}/by-root/${bundle.tree._hash}`,  
+                `${this.endpoint}/${bundleName}/diff-by-root/${bundle.hash}`,  
                 { responseType: 'arraybuffer', async: true }
             );
 
             res = decode(res);
 
-            let src = applyDiff(bundle.src, res);
-            bundle = new Bundle(src);
-            await set(bundleName, bundle)
+            let src = applyDiff(bundle.src, bundle.chunkLookup, res);
 
             if(opts.exec) {
                 try {
-                    eval(bundle.src)
+                    eval(src)
                 } catch(ex) {
                     throw new Error(`Bundle loaded, but it threw errors: ${ex}`)
                 }
             }
+
+            let processor = new BundleProcessor();
+            processor.postMessage({ bundleName, src });
             
-            return bundle;
+            // return bundle;
 
         } catch(ex) {
             throw ex;

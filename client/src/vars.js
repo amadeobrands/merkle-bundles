@@ -1,0 +1,1 @@
+export const CLIENT_GLOBAL_NAME = 'MerkleAstBundleClient';

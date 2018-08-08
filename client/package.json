@@ -6,10 +6,13 @@
   "directories": {
     "test": "test"
   },
+  "files": [
+    "dist/min"
+  ],
   "scripts": {
     "locals": "yarn add ../core && yarn add -D ../server",
-    "build": "webpack --config webpack.config.js",
-    "dev": "webpack --watch --config webpack.config.js",
+    "build": "NODE_ENV=production webpack --mode=production --config webpack.config.js",
+    "dev": "NODE_ENV=development webpack --watch --config webpack.config.js",
     "test:unit": "$(npm bin)/merkle-ast-serve -d tests/client/test-bundles/ | karma start client.karma.conf.js",
     "test:e2e": "mocha ./test/e2e/index",
     "test:e2e:dev": "cd test/e2e/page1/ && webpack --watch --config webpack.config.js",
@@ -18,23 +21,28 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
+    "js-cookie": "^2.2.0",
     "localforage": "^1.7.2",
-    "lodash.merge": "^4.6.1",
-    "ts-loader": "^4.4.2",
-    "typescript": "^3.0.1",
-    "webpack": "^4.16.3",
-    "webpack-cli": "^3.1.0"
+    "lodash.merge": "^4.6.1"
   },
   "devDependencies": {
     "assert": "^1.4.1",
+    "astex-core": "../core",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
     "chalk": "^2.4.1",
     "karma": "^2.0.5",
     "mocha": "^5.2.0",
     "puppeteer": "^1.6.1",
     "q": "^1.5.1",
+    "raw-loader": "^0.5.1",
     "shelljs": "^0.8.2",
-    "static-server": "^2.2.1"
+    "static-server": "^2.2.1",
+    "ts-loader": "^4.4.2",
+    "typescript": "^3.0.1",
+    "webpack": "^4.16.3",
+    "webpack-cli": "^3.1.0",
+    "webpack-obfuscator": "^0.17.3",
+    "worker-loader": "^2.0.0"
   }
 }

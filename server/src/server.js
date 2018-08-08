@@ -22,7 +22,14 @@ app.get('/bundle-diffs/:id/by-root/:root', function (req, res) {
     res.end(null, 'binary');
 })
 
-const clientBundle = require('raw-loader!astex-client/dist/bundle');
+// const clientBundle = require('raw-loader!astex-client/dist/bundle'); 
+const clientBootstrap = require('raw-loader!astexClientBootstrap');
+const clientBundle = require('raw-loader!astexClientBundle');
+
+app.get('/turbo.js', (req, res) => {
+    res.write(clientBootstrap, 'utf-8')
+    res.end()
+})
 
 app.get('/merkle-ast-client-bundle', (req, res) => {
     res.write(clientBundle, 'utf-8')
@@ -61,7 +68,7 @@ export function command() {
     console.log(`Serving bundles from path: \n${basePath}`)
     console.log(`Preloading into cache...`)
     loadInitialModules(basePath, watch).then(() => {
-        console.log(`Now running server on ${addr}:${port}`)
+        console.log(`Now running server on http://${addr}:${port}`)
         app.listen(port, addr);
     })
 }

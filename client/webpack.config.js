@@ -1,6 +1,9 @@
 // For the client-library
 const path = require('path');
 const merge = require('lodash.merge');
+const webpack = require('webpack');
+var JavaScriptObfuscator = require('webpack-obfuscator');
+
 
 let mode = process.env.NODE_ENV == 'development' ? 'development' : 'production';
 
@@ -16,16 +19,36 @@ const base = {
     },  
 
     plugins: [
-        mode == 'production' ? () => {} : new BundleAnalyzerPlugin()
+        new webpack.DefinePlugin({
+            PACKAGE_JSON: JSON.stringify(require("./package.json"))
+        }),
+        // mode == 'production' ? () => {} : new BundleAnalyzerPlugin(),
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+            }
+        }),
+        // mode == 'production' ? new JavaScriptObfuscator({
+        //     rotateUnicodeArray: true
+        // }) : () => {}
     ],
 
     module: {
         rules: [
             {
+                test: /\.worker\.js$/,
+                use: {
+                    loader: 'worker-loader',
+                    options: { inline: true, fallback: false }
+                },
+                
+            },
+
+            {
                 test: /\.js$/,
                 exclude: /(node_modules|vendor)/,
                 use: ['babel-loader'],
-            }
+            },
         ]
     },
 
@@ -50,12 +73,21 @@ const bootstrap = merge({}, base, {
     
 	output: {
         filename: 'bootstrap.js',
-        // library: 'MerkleAstBundles',
-        libraryTarget: 'commonjs'
+        // libraryTarget: 'commonjs'
+    }
+});
+
+const bootstrapSlim = merge({}, base, {
+    entry: './bootstrap-slim',
+    
+	output: {
+        filename: 'bootstrap-slim.js',
+        // libraryTarget: 'commonjs'
     }
 });
 
 module.exports = [
     bundle, 
     bootstrap,
+    bootstrapSlim,
 ];

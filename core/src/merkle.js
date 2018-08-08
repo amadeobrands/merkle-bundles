@@ -201,16 +201,13 @@ export function buildDiff(src, treeWithLocs, commonChunks) {
     }
 }
 
-
-export function applyDiff(src, diff) {
-    console.log("Received diff: ", diff)
-    let treeWithLocs = parse(src, true);
-    // let src = recast.print(treeWithLocs).code;
-
+export function makeChunkLookup(hashTreeWithLocs) {
+    // let treeWithLocs = parse(src, true);
     let chunkLookup = {};
-    let hashTree = getHashedTree(treeWithLocs);
+    // let hashTree = getHashedTree(treeWithLocs);
 
-    bfsVisit(hashTree, node => {
+
+    bfsVisit(hashTreeWithLocs, node => {
         if(!node[HASH]) return true;
         // let hash = hexToArrayBuffer(node[HASH]);
         let hash = node[HASH];
@@ -219,6 +216,12 @@ export function applyDiff(src, diff) {
         return true;
     });
 
+    return chunkLookup
+}
+
+export function applyDiff(src, chunkLookup, diff) {
+    console.log("Received diff: ", diff)
+    if(!chunkLookup) throw new Error("need chunk lookup");
     // console.log(chunkLookup);
 
     let newSrc = diff.diff.map(x => {

@@ -1,9 +1,12 @@
 const path = require('path');
 const merge = require('lodash.merge');
+const webpack = require('webpack');
+
+let mode = process.env.NODE_ENV == 'development' ? 'development' : 'production';
 
 const base = {
   target: 'node',
-  mode: 'development',
+  mode,
   entry: './src/index.ts',
   module: { 
     rules: [
@@ -14,6 +17,13 @@ const base = {
       }
     ]
   },
+  plugins: [
+    new webpack.DefinePlugin({
+        'process.env': {
+            NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+        }
+    })
+  ],
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ]
   },

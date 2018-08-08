@@ -1,5 +1,45 @@
+Why is this superior to simply using a diff algorithm and storing the history of files?
+ - merkle trees preserve space (so you only need to store the merkle tree on the server)
+ - merkle trees on AST's are a much better diffing algorithm.
+
+
+
+
+
+
+simplified design
+=================
+
+watch files
+every change => commit new file to memory chunks[hash(bundlename,content)] =>(bundlename, content)
+
+http server:
+    /turbo.js ->
+        read most recent versions of files from cookies.
+        
+        get diff:
+            old = chunks[cookie.id]
+            new = chunks[current]
+            diff(old, new)
+
+        construct diff update on the fly:
+            let old = 
+
+
+
+
+
+
+
+
+
+
+
+
 code sign the root of each update to the tree
 use that as proof somehow so you can bittorrent the source
+then make a distributed package manager
+
 
 
 also

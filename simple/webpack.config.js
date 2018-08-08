@@ -17,7 +17,7 @@ module.exports = {
     noParse: [/aws-sdk.js/],
     rules: [
       {
-        test: /\.ts?$/,
+        test: /\.ts?$/, 
         use: 'ts-loader',
         exclude: /node_modules/
       }
@@ -29,18 +29,9 @@ module.exports = {
             NODE_ENV: JSON.stringify(process.env.NODE_ENV)
         }
     }),
-    // mode == 'production' ? new JavaScriptObfuscator({
-    //     rotateUnicodeArray: true
-    // }) : () => {}
   ],
   resolve: {
     extensions: [ '.ts', '.js' ],
-
-    alias: {
-      astexClientBootstrap: mode === 'development' ? 'astex-client/dist/bootstrap' : 'astex-client/dist/min/bootstrap',
-      astexClientBundle:    mode === 'development' ? 'astex-client/dist/bundle' : 'astex-client/dist/min/bundle'
-    }
-
   },
   output: {
     filename: 'bundle.js',
