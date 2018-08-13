@@ -4,8 +4,8 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "NODE_ENV=development webpack --watch --config webpack.config.js",
-    "build": "NODE_ENV=production webpack --config webpack.config.js"
+    "dev": "NODE_ENV=development webpack-cli --watch --config webpack.config.js",
+    "build": "NODE_ENV=production webpack-cli --config webpack.config.js"
   },
   "files": [
     "dist"
@@ -26,9 +26,9 @@
     "get-object-type": "^0.0.2",
     "lodash.merge": "^4.6.1",
     "symbol-description": "^1.0.0",
-    "webpack-cli": "^3.1.0",
     "ts-loader": "^4.4.2",
     "typescript": "^3.0.1",
-    "webpack": "^4.16.3"
+    "webpack": "^4.16.3",
+    "webpack-cli": "^3.1.0"
   }
 }

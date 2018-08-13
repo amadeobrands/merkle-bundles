@@ -89,10 +89,6 @@ class FileMgr {
         return dfd.promise;
     }
 
-    static keyFor(fname: string, content: string): FileId {
-        return `${sha256(fname + content, { asString: true })}`;
-    }
-
     onFileUpdate(fname: string, fpath: string) {
         console.log(`reloading: ${fname}`)
         const content: string = readFileSync(fpath, 'utf-8');

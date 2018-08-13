@@ -5,7 +5,7 @@ const webpack = require('webpack');
 var JavaScriptObfuscator = require('webpack-obfuscator');
 
 
-let mode = process.env.NODE_ENV == 'development' ? 'development' : 'production';
+let mode = process.env.NODE_ENV;
 
 const base = {
     mode,
