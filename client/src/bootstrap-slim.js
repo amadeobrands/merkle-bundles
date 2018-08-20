@@ -36,6 +36,3 @@ const parseUrl = (url) => {
     let client = await bootstrap(endpoint);
     client.load(scripts[0]);
 })()
-// window.addEventListener('DOMContentLoaded', async function() {
-    
-// });

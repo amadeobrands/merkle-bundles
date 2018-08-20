@@ -1,3 +1,12 @@
+troubles moving over to arraybuffers:
+ - equals is by reference UGH
+ - have to change find methods (esp from underscore)
+ - can't use the same value as a key anymore (only strings)
+
+
+
+
+
 Why is this superior to simply using a diff algorithm and storing the history of files?
  - merkle trees preserve space (so you only need to store the merkle tree on the server)
  - merkle trees on AST's are a much better diffing algorithm.

@@ -2,7 +2,6 @@ import * as path from 'path';
 import program from 'commander';
 import * as Q from 'q';
 import * as chokidar from 'chokidar';
-import * as sha256 from 'sha256';
 import { readFileSync } from 'fs';
 
 
@@ -14,7 +13,8 @@ import {
     getHashedTree,
     getChunks,
     buildDiff,
-    compactDiff
+    compactDiff,
+    packDiff
 } from 'astex-core/dist/bundle.node';
 
 
@@ -136,7 +136,7 @@ class FileMgr {
 
         let commonChunks = new Set(Array.from(clientChunks).filter(x => chunks.has(x)));
         let diff = buildDiff(content, tree, commonChunks);
-        return compactDiff(diff);
+        return packDiff(diff);
     }
 }
 
