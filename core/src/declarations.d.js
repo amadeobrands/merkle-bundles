@@ -4,6 +4,7 @@ declare module "lodash.merge";
 declare module "js-sha256";
 declare module "lodash.includes";
 declare module "console";
+declare module "arraybuffer-to-string";
 
 declare var require: any;
 

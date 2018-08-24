@@ -1,3 +1,23 @@
+dumb client is simply:
+
+(oldhash, newhash) => newcode
+
+
+
+
+<script 
+      async
+      type='text/javascript' 
+      src='http://localhost:3000/turbo.js' 
+      id='turbojs' 
+      integrity="" 
+      data-scripts='bundle.js'>
+    </script>
+
+
+
+
+
 troubles moving over to arraybuffers:
  - equals is by reference UGH
  - have to change find methods (esp from underscore)

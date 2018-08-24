@@ -2,37 +2,26 @@ import getType from 'get-object-type';
 import esprima from 'esprima';
 import { sha224 } from 'js-sha256';
 
-const includes = require('lodash.includes');
-const sortBy = require('lodash.sortby');
-const findIndex = require('lodash.findindex');
+import {
+    Hash,
+    hashesEqual
+} from './hash';
 
 import {
     getKeyVals,
     isArrayFullOfPrimitives
 } from './helper';
 
-const coding = require('coding');
-
-var isEqual = require('arraybuffer-equal');
-export function hashesEqual(a: Hash, b: Hash) : boolean {
-    // return a === b;
-    return isEqual(a, b);
-}
-
-export type Hash = ArrayBuffer;
-// export type Hash = number[];
-// export type Hash = string;
-
-export interface Hashed
+export interface IHashed
 {
     _hash: Hash
 }
 
-interface HashedArray<array> extends Hashed {};
+interface HashedArray<array> extends IHashed {};
 
 export type HashedTreeNode = HashedTree | HashedArray<any>;
 
-export interface HashedTree extends Hashed 
+export interface HashedTree extends IHashed 
 {
     [k: string]: HashedTreeNode | Hash,
 };
@@ -54,7 +43,7 @@ export interface HashedTree extends Hashed
 //     val: HashedTree | HashedPrimitive<any>,
 //     _hash: Hash
 // };
-interface HashValContainer extends Hashed {
+interface HashValContainer extends IHashed {
     val: HashedTree | HashedArray<HashValContainer> | any,
 }
 
@@ -78,6 +67,10 @@ export function getHashedTree(thing: any): HashValContainer {
         let kvs = getKeyVals(thing);
 
         let subtrees = kvs.map(({ k, v }) => {
+            if(k === 'range') {
+                console.log("Skipping range")
+                return;
+            }
             let { _hash, val } = getHashedTree(v);
             return { k, _hash, val };
         })
@@ -109,7 +102,7 @@ export function getHashedTree(thing: any): HashValContainer {
             let subtrees: HashValContainer[] = arr.map(getHashedTree);
             const _hash = hashSubtrees(subtrees);
             // @ts-ignore
-            const val: HashedArray<Hashed<any>> = subtrees.map(({ val }) => val);
+            const val: HashedArray<IHashed<any>> = subtrees.map(({ val }) => val);
             val._hash = _hash;
             return { val, _hash };
         }
@@ -128,17 +121,6 @@ export function getHashedTree(thing: any): HashValContainer {
 export function parse(src: string, range: boolean): any {
     return esprima.parse(src, { range })
 }
-
-
-export const HashTree = Symbol('HashTree');
-export const Ast = Symbol('Ast');
-export const Diffs = Symbol('Diffs');
-export const BinDiffs = Symbol('BinDiffs');
-export const Stats = Symbol("Stats");
-
-
-
-
 
 
 function getChildren(node: HashedTreeNode) {

@@ -1,35 +1,44 @@
 import {
     Hash,
-    Hashed,
+} from './hash';
+
+import {
+    IHashed,
     HashedTreeNode,
     HashedTree,
     bfsVisit
 } from './merkle';
 
-export interface HashedTreeWithLocs extends Hashed 
+import { Bundle } from './bundle';
+
+interface IWithCodeRanges {
+    range: SourceCodeRange
+};
+
+export type HashedTreeNodeWithCodeRange = HashedTreeNode & IWithCodeRanges;
+
+export interface HashedTreeWithLocs extends IHashed, IWithCodeRanges
 {
     [k: string]: HashedTreeNode | Hash | SourceCodeRange,
 };
+
+
 
 
 // index of chunk
 export type ChunkId = Hash;
 export type Chunkset = Set<ChunkId>;
 
-export function getCommonChunks(tree1: HashedTree, tree2: HashedTree) {
-    let chunks1 = getChunks(tree1);
-    let chunks2 = getChunks(tree2);
-    return Array.from(chunks1).filter(x => chunks2.has(x));
+export function getCommonChunks(a: Bundle, b: Bundle): Chunkset {
+    let chunks1 = Object.keys(a.chunks);
+    let chunks2 = new Set(Object.keys(b.chunks));
+    return new Set(chunks1.filter((x: ChunkId) => chunks2.has(x)))
 }
 
-export function getChunks(tree: HashedTree): Chunkset {
+export function getChunks(tree: HashedTreeWithLocs): Chunkset {
     let chunks: Chunkset = new Set();
-    // let current: ChunkId = 0;
-
     bfsVisit(tree, (node) => {
         chunks.add(node._hash);
-        // chunks.add(current);
-        // current++;
         return true
     })
     return chunks
@@ -40,16 +49,15 @@ export interface ChunkLookup {
     [chunkId: string]: SourceCodeRange
 };
 
-export function makeChunkLookup(tree: HashedTreeWithLocs) : ChunkLookup {
+export function makeChunkLookup(tree: HashedTreeWithLocs): ChunkLookup {
     const chunkLookup: ChunkLookup = {};
 
     bfsVisit(tree, node => {
         if(!node._hash) return true;
         const hash = node._hash;
-        // console.log(hash)
 
-        // @ts-ignore this exists TODO
-        chunkLookup[hash] = node.range;
+        // TODO brittle
+        chunkLookup[hash] = (node as HashedTreeNodeWithCodeRange).range;
         return true;
     });
 

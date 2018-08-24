@@ -12,10 +12,12 @@ import {
     parse,
     getHashedTree,
     getChunks,
-    buildDiff,
-    compactDiff,
-    packDiff
-} from 'astex-core/dist/bundle.node';
+    DiffFactory,
+    Bundle,
+    packDiff,
+    BinaryDiff
+// } from 'astex-core/dist/bundle.node';
+} from '../../core/src/index';
 
 
 let fmgr: FileMgr;
@@ -48,7 +50,7 @@ export function command() {
 
 
 
-type FileId = string;
+
 type FileContent = {
     content: string,
     chunks: any,
@@ -56,18 +58,18 @@ type FileContent = {
     tree: any,
 };
 
-interface FileMgrStore {
-    [key: string]: FileContent;
+interface BundleStore {
+    [key: string]: Bundle;
 };
 
-interface FileLatestStore {
-    [key: string]: FileId
+interface LatestBundleStore {
+    [key: string]: Hash
 }
 
 class FileMgr {
     basePath: string;
-    store: FileMgrStore = {};
-    latest: FileLatestStore = {};
+    bundles: BundleStore = {};
+    latest: LatestBundleStore = {};
 
     constructor(basePath: string) {
         this.basePath = basePath;
@@ -92,50 +94,31 @@ class FileMgr {
     onFileUpdate(fname: string, fpath: string) {
         console.log(`reloading: ${fname}`)
         const content: string = readFileSync(fpath, 'utf-8');
-
-        let ast, astLocs;
-        try {
-            ast = parse(content, false);
-            astLocs = parse(content, true);
-        } catch(ex) {
-            console.error(`Couldn't load ${fname} due to parsing errors:`)
-            console.error(ex)
-            return;
-        }
-    
-        const hashedTree = getHashedTree(ast);
-        const tree = merge(astLocs, hashedTree.val);
-        const chunks = getChunks(tree);
-
-
-        const k = hashedTree.hash;
-        this.store[k] = {
-            fname,
-            content,
-            chunks,
-            tree,
-        };
+        let bundle = new Bundle(fname, content);
+        const k = bundle.root;
         // events.emit('reloaded', { bundleFilename, root: hashedTree.hash })
         this.latest[fname] = k;
         console.log(`reloading complete: ${fname}, new root ${k}`)
     }
 
-    generateDiff(fname: string, clientRoot: string) {
+    generateDiff(fname: string, clientRoot: string): BinaryDiff {
         // https://github.com/binast/binjs-ref
-        
         let latestRoot = this.latest[fname];
-        console.log(fname, clientRoot, latestRoot)
-        let { chunks, tree, content } = this.store[latestRoot];
+        console.log(fname, clientRoot, latestRoot);
+
+        let old = this.bundles[clientRoot];
+        let latest = this.bundles[latestRoot];
         
-        let clientChunks = [];
-        if(this.store[clientRoot]) {
-            clientChunks = this.store[clientRoot].chunks;
-        } else {
-            console.warn(`No loaded file found for ${fname} with root ${clientRoot}`)
+        let clientChunks = latest.chunks;
+        if(!old) {
+            throw new Error(`Couldn't find bundle that client mentioned: ${clientRoot}`)
+        }
+        if(!latest) {
+            throw new Error(`No loaded file found for ${fname} with root ${clientRoot}`)
         }
 
-        let commonChunks = new Set(Array.from(clientChunks).filter(x => chunks.has(x)));
-        let diff = buildDiff(content, tree, commonChunks);
+        let diff = DiffFactory.build(old, latest);
+        // buildDiff(content, tree, commonChunks);
         return packDiff(diff);
     }
 }
@@ -163,6 +146,7 @@ import * as express from 'express';
 import * as cors from "cors";
 import * as cookieParser from 'cookie-parser';
 import { loadavg } from 'os';
+import { Hash } from '../../core/src/hash';
 
 const app = express();
 app.use(cors())

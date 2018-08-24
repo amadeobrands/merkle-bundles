@@ -239,6 +239,10 @@ arraybuffer-equal@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/arraybuffer-equal/-/arraybuffer-equal-1.0.4.tgz#398daeffe5ae3bdb15146196d741dd73b674a578"
 
+arraybuffer-to-string@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/arraybuffer-to-string/-/arraybuffer-to-string-1.0.2.tgz#c373aa7bb0e6844d9a2bc9654c8889a9570a26e2"
+
 asn1.js@^4.0.0:
   version "4.10.1"
   resolved "https://registry.yarnpkg.com/asn1.js/-/asn1.js-4.10.1.tgz#b9c2bf5805f1e64aadeed6df3a2bfafb5a73f5a0"
