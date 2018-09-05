@@ -1,7 +1,14 @@
 {
   "compilerOptions": {
+    "lib": [
+      "ES6",
+      "ES2017",
+      "ES2017.object",
+      "dom"
+    ],
+    "downlevelIteration": true,
     "outDir": "./dist/",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "module": "es6",
     "target": "es5",
     "jsx": "react",

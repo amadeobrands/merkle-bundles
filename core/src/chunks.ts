@@ -9,7 +9,7 @@ import {
     bfsVisit
 } from './merkle';
 
-import { Bundle } from './bundle';
+import { LightBundle } from './bundle/dumb';
 
 interface IWithCodeRanges {
     range: SourceCodeRange
@@ -29,7 +29,7 @@ export interface HashedTreeWithLocs extends IHashed, IWithCodeRanges
 export type ChunkId = Hash;
 export type Chunkset = Set<ChunkId>;
 
-export function getCommonChunks(a: Bundle, b: Bundle): Chunkset {
+export function getCommonChunks(a: LightBundle, b: LightBundle): Chunkset {
     let chunks1 = Object.keys(a.chunks);
     let chunks2 = new Set(Object.keys(b.chunks));
     return new Set(chunks1.filter((x: ChunkId) => chunks2.has(x)))

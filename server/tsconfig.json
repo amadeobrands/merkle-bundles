@@ -1,11 +1,19 @@
 {
   "compilerOptions": {
+    "downlevelIteration": true,
     "outDir": "./dist/",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "module": "es6",
-    "target": "es5",
+    "lib": [
+      "es2017",
+      "es2017.object",
+    ],
     "jsx": "react",
     "sourceMap": true,
     "allowJs": true
-  }
+  },
+  "include": [
+    "../core/src/**/*.ts",
+    "./src/*.ts"
+  ]
 }

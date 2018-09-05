@@ -3,7 +3,8 @@ const path = require('path');
 const merge = require('lodash.merge');
 const webpack = require('webpack');
 var JavaScriptObfuscator = require('webpack-obfuscator');
-
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 let mode = process.env.NODE_ENV;
 
@@ -19,10 +20,9 @@ const base = {
     },  
 
     plugins: [
-        new webpack.DefinePlugin({
-            PACKAGE_JSON: JSON.stringify(require("./package.json"))
-        }),
-        // mode == 'production' ? () => {} : new BundleAnalyzerPlugin(),
+        // new webpack.DefinePlugin({
+        //     PACKAGE_JSON: JSON.stringify(require("./package.json"))
+        // }),
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV)
@@ -31,25 +31,37 @@ const base = {
         // mode == 'production' ? new JavaScriptObfuscator({
         //     rotateUnicodeArray: true
         // }) : () => {}
-    ],
+    ].concat(mode == 'production' ? [
+        new BundleAnalyzerPlugin(),
+        new UglifyJsPlugin()
+    ] : []),
 
     module: {
         rules: [
-            {
-                test: /\.worker\.js$/,
-                use: {
-                    loader: 'worker-loader',
-                    options: { inline: true, fallback: false }
-                },
+            // {
+            //     test: /\.worker\.js$/,
+            //     use: {
+            //         loader: 'worker-loader',
+            //         options: { inline: true, fallback: false }
+            //     },
                 
+            // },
+            {
+                test: /\.ts|js$/,
+                use: ['ts-loader'],
+                exclude: /node_modules/
             },
 
-            {
-                test: /\.js$/,
-                exclude: /(node_modules|vendor)/,
-                use: ['babel-loader'],
-            },
+            // {
+            //     test: /\.js$/,
+            //     exclude: /(node_modules|vendor)/,
+            //     use: ['babel-loader'],
+            // },
         ]
+    },
+
+    resolve: {
+        extensions: [ '.ts', '.js' ],
     },
 
     output: {
@@ -59,7 +71,7 @@ const base = {
 }
 
 const bundle = merge({}, base, {
-    entry: './index',
+    entry: './loader',
     
 	output: {
         filename: 'bundle.js',
@@ -68,26 +80,26 @@ const bundle = merge({}, base, {
     }
 });
 
-const bootstrap = merge({}, base, {
-    entry: './bootstrap',
+// const bootstrap = merge({}, base, {
+//     entry: './bootstrap',
     
-	output: {
-        filename: 'bootstrap.js',
-        // libraryTarget: 'commonjs'
-    }
-});
+// 	output: {
+//         filename: 'bootstrap.js',
+//         // libraryTarget: 'commonjs'
+//     }
+// });
 
-const bootstrapSlim = merge({}, base, {
-    entry: './bootstrap-slim',
+// const bootstrapSlim = merge({}, base, {
+//     entry: './bootstrap-slim',
     
-	output: {
-        filename: 'bootstrap-slim.js',
-        // libraryTarget: 'commonjs'
-    }
-});
+// 	output: {
+//         filename: 'bootstrap-slim.js',
+//         // libraryTarget: 'commonjs'
+//     }
+// });
 
 module.exports = [
     bundle, 
-    bootstrap,
-    bootstrapSlim,
+    // bootstrap,
+    // bootstrapSlim,
 ];

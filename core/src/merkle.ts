@@ -1,9 +1,11 @@
 import getType from 'get-object-type';
-import esprima from 'esprima';
+
+var esprima = require('esprima');
 import { sha224 } from 'js-sha256';
 
 import {
     Hash,
+    hasher,
     hashesEqual
 } from './hash';
 
@@ -49,16 +51,13 @@ interface HashValContainer extends IHashed {
 
 
 
-const hasher = (v: any) : Hash => {
-    // return sha224(`${v}`).substring(0, 14);
-    // return sha224.array(v);
-    return sha224.arraybuffer(v);
-}
-
 function hashSubtrees(subtrees: HashValContainer[]) : Hash {
     return hasher( subtrees.map(({ _hash }) => _hash).join('') );
 }
 
+const IGNORED_KEYS = {
+    'range': true
+};
 
 export function getHashedTree(thing: any): HashValContainer {
     let typ = getType(thing);
@@ -67,10 +66,11 @@ export function getHashedTree(thing: any): HashValContainer {
         let kvs = getKeyVals(thing);
 
         let subtrees = kvs.map(({ k, v }) => {
-            if(k === 'range') {
-                console.log("Skipping range")
-                return;
+            if(IGNORED_KEYS[k]) {
+                // console.log(`Skipping key: ${k}`)
+                return { k, _hash: "", val: v };
             }
+
             let { _hash, val } = getHashedTree(v);
             return { k, _hash, val };
         })

@@ -8,11 +8,14 @@
     ],
     "downlevelIteration": true,
     "outDir": "./dist/",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "module": "es6",
     "target": "es5",
     "jsx": "react",
     "sourceMap": true,
-    "allowJs": true
-  }
+    "allowJs": true,
+  },
+  "files": [
+    ""
+  ]
 }

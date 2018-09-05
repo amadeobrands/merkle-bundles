@@ -1,8 +1,9 @@
-import { HashedTreeWithLocs, ChunkLookup, makeChunkLookup, ChunkId } from "./chunks";
-import { parse, getHashedTree } from "./merkle";
-import { Hash } from "./hash";
+import { HashedTreeWithLocs, ChunkLookup, makeChunkLookup, ChunkId } from "../chunks";
+import { parse, getHashedTree } from "../merkle";
+import { Hash } from "../hash";
+import { LightBundle } from './dumb';
 
-abstract class BundleCore {
+abstract class BundleCore implements LightBundle {
     // canonical name, e.g. jquery
     name: string;
     src: string;
@@ -33,15 +34,6 @@ abstract class BundleCore {
     }
 }
 
-export class LightBundle extends BundleCore {
-    constructor(name: string, src: string) {
-        super(name, src);
-        let { root, chunkLookup } = this.build();
-        this.root = root;
-        this.chunks = chunkLookup;
-    }
-};
-
 export class Bundle extends BundleCore {
     tree?: HashedTreeWithLocs
 
@@ -56,7 +48,3 @@ export class Bundle extends BundleCore {
         this.src = "";
     }
 }
-
-// export const getCommonChunks(a: BundleCore, b: BundleCore) {
-//     return 
-// }

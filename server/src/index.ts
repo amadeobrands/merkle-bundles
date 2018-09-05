@@ -1,23 +1,22 @@
 import * as path from 'path';
+// @ts-ignore
 import program from 'commander';
+// @ts-ignore
 import * as Q from 'q';
+// @ts-ignore
 import * as chokidar from 'chokidar';
 import { readFileSync } from 'fs';
 
+// const EventEmitter = require('events');
+// const glob = require("glob")
 
-const EventEmitter = require('events');
-const glob = require("glob")
-import merge from 'lodash.merge';
 import {
-    parse,
-    getHashedTree,
-    getChunks,
-    DiffFactory,
     Bundle,
     packDiff,
-    BinaryDiff
-// } from 'astex-core/dist/bundle.node';
+    BinaryDiff,
+    buildDiff
 } from '../../core/src/index';
+
 
 
 let fmgr: FileMgr;
@@ -33,30 +32,24 @@ export function command() {
 
     console.log('turbojs - with <3 from @liamzebedee');
     const basePath = path.resolve(program.dir);
-    const port = program.port || 3000;
-    const addr = program.addr || '127.0.0.1';
+    const port = program.port;
+    const addr = program.addr;
     const watch = !(process.env.NODE_ENV === 'test') || true;
 
-    console.log(`Serving bundles from path: \n${basePath}`)
-    console.log(`Preloading into cache...`)
-
-    fmgr = new FileMgr(basePath);
-    fmgr.watch()
-    .then(() => {
-        Server.run(addr, port);
-    })
-    
+    astexServer(addr, port, basePath);
 }
 
-
-
-
-type FileContent = {
-    content: string,
-    chunks: any,
-    fname: string,
-    tree: any,
-};
+export default async function astexServer(
+    addr: string = '127.0.0.1', 
+    port: number = 3000, 
+    basePath: string)
+{
+    console.log(`Serving bundles from path: \n${basePath}`)
+    console.log(`Preloading into cache...`)
+    fmgr = new FileMgr(basePath);
+    await fmgr.watch()
+    await Server.run(addr, port);
+}
 
 interface BundleStore {
     [key: string]: Bundle;
@@ -75,7 +68,7 @@ class FileMgr {
         this.basePath = basePath;
     }
 
-    watch() {
+    watch(): Promise<any> {
         let bundleFileGlob = path.join(this.basePath, "/*.js");
         console.log(`Watching ${bundleFileGlob}`);
     
@@ -117,7 +110,7 @@ class FileMgr {
             throw new Error(`No loaded file found for ${fname} with root ${clientRoot}`)
         }
 
-        let diff = DiffFactory.build(old, latest);
+        let diff = buildDiff(old, latest);
         // buildDiff(content, tree, commonChunks);
         return packDiff(diff);
     }
@@ -145,7 +138,6 @@ class Bootstrapper {
 import * as express from 'express';
 import * as cors from "cors";
 import * as cookieParser from 'cookie-parser';
-import { loadavg } from 'os';
 import { Hash } from '../../core/src/hash';
 
 const app = express();
@@ -185,9 +177,12 @@ app.get('/:fname/diff-by-root/:root', (req, res) => {
 })
 
 class Server {
-    static run(addr: string, port: number) {
-        app.listen(port, addr, () => {
-            console.log(`Now running server on http://${addr}:${port}`)
+    static run(addr: string, port: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            app.listen(port, addr, () => {
+                console.log(`Now running server on http://${addr}:${port}`)
+                resolve()
+            });
         });
     }
 }

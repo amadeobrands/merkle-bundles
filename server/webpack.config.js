@@ -10,7 +10,6 @@ module.exports = {
   externals: [
     'aws-sdk'
   ],
-  // externals: [nodeExternals()],
   mode,
   entry: './src/index.ts',
   module: { 

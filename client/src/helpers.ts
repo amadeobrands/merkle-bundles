@@ -1,15 +1,24 @@
-const merge = require('lodash.merge');
+type ajaxOpts = {
+    method?: 'GET',
+    responseType: XMLHttpRequestResponseType,
+    headers: { [k: string]: string }
+};
 
-
-export const ajaxGet = (url, userOpts) => {
+export function ajaxGet(url: string, userOpts: ajaxOpts): Promise<any> {
     let prom = new Promise((resolve, reject) => {
-        let opts = merge({
+        let opts = {
             method: 'GET',
-            responseType: 'text'
-        }, userOpts)
+            responseType: 'text',
+            headers: [],
+            ...userOpts
+        };
     
         let xhr = new XMLHttpRequest();
         xhr.open(opts.method, url, true);
+        Object.entries(opts.headers).map(([ k, v ]) => {
+            xhr.setRequestHeader(k, v);
+        })
+        
         xhr.responseType = opts.responseType;
         
         xhr.onload = function(e) {
@@ -30,4 +39,10 @@ export const ajaxGet = (url, userOpts) => {
     });
 
     return prom;
+}
+
+export function parseUrl(url: string) {
+    let el = document.createElement('a');
+    el.href = url;
+    return el;
 }

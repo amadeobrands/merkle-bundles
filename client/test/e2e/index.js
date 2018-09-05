@@ -29,18 +29,12 @@ const bundleServerAddr = new Addr('localhost', 9002)
 const dir = path.resolve(__dirname, "./page1/dist");
 console.log(`Loading E2E test in ${dir}`);
 
-const AstexServer = require('astex-server');
+// const astexServer = require('../../../server/src/index');
+const astexServer = require('../../../server/dist/bundle').default;
 
 const setupBundleServer = async () => {
-    let app = await AstexServer.makeApp(dir);
-    let x = new Promise((resolve, reject) => {
-        bundleServer = app
-        .listen(bundleServerAddr.port, bundleServerAddr.host, () => {
-            log(chalk.blue("Setup bundle server"));
-            resolve()
-        });
-    });
-    return x;
+    await astexServer(bundleServerAddr.host, bundleServerAddr.port, dir)
+    log(chalk.blue("Setup bundle server"));
 }
 
 const setupWebappServer = async () => {
@@ -90,24 +84,6 @@ const trackResponseLoaded = (page, url) => {
 
 
 
-
-
-
-// const {
-//     webappServer,
-//     webappServerAddr,
-//     bundleServer,
-//     bundleServerAddr,
-
-//     setupBundleServer,
-//     setupWebappServer,
-//     setupBrowser,
-
-//     browser,
-//     page,
-
-//     dir
-// } = require('./setup');
 
 let DEBUG_BROWSER;
 // DEBUG_BROWSER = true;
