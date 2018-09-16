@@ -1,0 +1,19 @@
+{
+    "scripts": {
+        "test:e2e": "mocha -r ts-node/register test/e2e/index.js"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.1.4",
+        "@types/mocha": "^5.2.5",
+        "chai": "^4.1.2",
+        "chai-as-promised": "^7.1.1",
+        "chalk": "^2.4.1",
+        "mocha": "^5.2.0",
+        "path": "^0.12.7",
+        "puppeteer": "^1.8.0",
+        "q": "^1.5.1",
+        "shelljs": "^0.8.2",
+        "ts-node": "^7.0.1",
+        "typescript": "^3.0.3"
+    }
+}

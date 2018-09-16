@@ -45,6 +45,9 @@ export class Bundle extends BundleCore {
             root,
             chunkLookup
         } = this.build();
+        this.root = root;
+        this.chunks = chunkLookup;
+        this.tree = tree.val;
         this.src = "";
     }
 }

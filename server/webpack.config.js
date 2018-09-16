@@ -16,7 +16,7 @@ module.exports = {
     noParse: [/aws-sdk.js/],
     rules: [
       {
-        test: /\.ts?$/, 
+        test: /\.ts|js$/,
         use: 'ts-loader',
         exclude: /node_modules/
       }

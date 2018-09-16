@@ -19,8 +19,8 @@ export class IDBBundleCacher extends BundleCacher {
 
         this.db = new Dexie('turbojs');
         this.db.version(1).stores({
-            bundles: 'root',
-            chunks: 'id'
+            bundles: '&root',
+            chunks: '&id'
         });
     }
 
@@ -45,7 +45,7 @@ export class IDBBundleCacher extends BundleCacher {
     }
 
     async getCachedBundles(): Promise<ChunkId[]> {
-        let ids = await this.db.bundles.primaryKeys() as ChunkId[];
+        let ids = await this.db.bundles.orderBy('root').primaryKeys() as ChunkId[];
         return ids;
     }
 

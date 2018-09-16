@@ -33,6 +33,10 @@ function bootstrap() {
     scriptsToLoad.map(script => loader.loadAndExec(script));
 }
 
+// set(CLIENT_GLOBAL_NAME, code);
+// import Cookie from 'js-cookie';
+// Cookie.set(PACKAGE_JSON.name, PACKAGE_JSON.version);
+
 (async function() {
     bootstrap()
 })()

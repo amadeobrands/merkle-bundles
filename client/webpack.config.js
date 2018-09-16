@@ -5,6 +5,8 @@ const webpack = require('webpack');
 var JavaScriptObfuscator = require('webpack-obfuscator');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+
 
 let mode = process.env.NODE_ENV;
 
@@ -20,9 +22,7 @@ const base = {
     },  
 
     plugins: [
-        // new webpack.DefinePlugin({
-        //     PACKAGE_JSON: JSON.stringify(require("./package.json"))
-        // }),
+        new CleanWebpackPlugin(path.join(__dirname, 'dist')),
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV)
@@ -51,12 +51,6 @@ const base = {
                 use: ['ts-loader'],
                 exclude: /node_modules/
             },
-
-            // {
-            //     test: /\.js$/,
-            //     exclude: /(node_modules|vendor)/,
-            //     use: ['babel-loader'],
-            // },
         ]
     },
 
@@ -71,7 +65,7 @@ const base = {
 }
 
 const bundle = merge({}, base, {
-    entry: './loader',
+    entry: './bootstrapper',
     
 	output: {
         filename: 'bundle.js',

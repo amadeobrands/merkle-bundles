@@ -7,8 +7,12 @@ import * as Q from 'q';
 import * as chokidar from 'chokidar';
 import { readFileSync } from 'fs';
 
-// const EventEmitter = require('events');
-// const glob = require("glob")
+const EventEmitter = require('events');
+// class MyEmitter extends EventEmitter {}
+export const events = new EventEmitter();
+
+
+
 
 import {
     Bundle,
@@ -48,7 +52,7 @@ export default async function astexServer(
     console.log(`Preloading into cache...`)
     fmgr = new FileMgr(basePath);
     await fmgr.watch()
-    await Server.run(addr, port);
+    return await Server.run(addr, port);
 }
 
 interface BundleStore {
@@ -68,30 +72,38 @@ class FileMgr {
         this.basePath = basePath;
     }
 
-    watch(): Promise<any> {
-        let bundleFileGlob = path.join(this.basePath, "/*.js");
+    async watch(): Promise<any> {
+        const jsGlob = "*.js";
+        let bundleFileGlob = path.join(this.basePath, '/', jsGlob);
+        
+        let fileLoaded = {};
+
+        const glob = require("glob");
+
+        let filesToLoad = (glob.sync(jsGlob, {
+            nodir: true,
+            cwd: this.basePath
+        }))
+
+        await Promise.all(filesToLoad.map(async fname => {
+            await this.onFileUpdate(fname, path.join(this.basePath, '/', fname));
+        }))
+
         console.log(`Watching ${bundleFileGlob}`);
-    
-        let dfd = new Q.defer();
-    
         chokidar.watch(bundleFileGlob)
         .on('all', (event: string, fpath: string) => {
             let fname = path.parse(fpath).base;
             this.onFileUpdate(fname, fpath);
         });
-        dfd.resolve();
-    
-        return dfd.promise;
     }
 
     onFileUpdate(fname: string, fpath: string) {
         console.log(`reloading: ${fname}`)
         const content: string = readFileSync(fpath, 'utf-8');
         let bundle = new Bundle(fname, content);
-        const k = bundle.root;
-        // events.emit('reloaded', { bundleFilename, root: hashedTree.hash })
-        this.latest[fname] = k;
-        console.log(`reloading complete: ${fname}, new root ${k}`)
+        events.emit('reloaded', { fname, root: bundle.root });
+        this.latest[fname] = bundle.root;
+        console.log(`reloading complete: ${fname}, new root ${bundle.root}`)
     }
 
     generateDiff(fname: string, clientRoot: string): BinaryDiff {
@@ -102,7 +114,6 @@ class FileMgr {
         let old = this.bundles[clientRoot];
         let latest = this.bundles[latestRoot];
         
-        let clientChunks = latest.chunks;
         if(!old) {
             throw new Error(`Couldn't find bundle that client mentioned: ${clientRoot}`)
         }
@@ -128,10 +139,10 @@ class Bootstrapper {
     }
 
     renderJS() {
-        if(this.loadedBefore) {
-            return readFile('bootstrap-slim.js');
-        }
-        return readFile('bootstrap.js');
+        // if(this.loadedBefore) {
+        //     return readFile('bootstrap-slim.js');
+        // }
+        return readFile('bundle.js');
     }
 }
 
@@ -167,7 +178,7 @@ app.get('/turbo.js', (req, res) => {
     res.end();
 });
 
-app.get('/:fname/diff-by-root/:root', (req, res) => {
+app.get('/:bundles/:root', (req, res) => {
     let fname: string = req.params.fname;
     let root = req.params.root || null;
     // let diff = generateDiff(bundleFilename, root);
@@ -179,9 +190,9 @@ app.get('/:fname/diff-by-root/:root', (req, res) => {
 class Server {
     static run(addr: string, port: number): Promise<any> {
         return new Promise((resolve, reject) => {
-            app.listen(port, addr, () => {
+            let httpserver = app.listen(port, addr, () => {
                 console.log(`Now running server on http://${addr}:${port}`)
-                resolve()
+                resolve({ app, httpserver, events })
             });
         });
     }

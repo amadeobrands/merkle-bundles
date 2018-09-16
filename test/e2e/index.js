@@ -1,6 +1,6 @@
 
 
-const assert = require("assert");
+// const assert = require("assert");
 const puppeteer = require('puppeteer');
 const chalk = require('chalk');
 const log = console.log;
@@ -8,6 +8,11 @@ const path = require('path');
 const shell = require('shelljs');
 const Q = require('q');
 
+const chai = require("chai");
+const chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
+const expect = chai.expect;
+const assert = chai.assert;
 
 class Addr {
     constructor(host, port) {
@@ -30,10 +35,11 @@ const dir = path.resolve(__dirname, "./page1/dist");
 console.log(`Loading E2E test in ${dir}`);
 
 // const astexServer = require('../../../server/src/index');
-const astexServer = require('../../../server/dist/bundle').default;
+const astexServer = require('../../server/dist/bundle').default;
 
 const setupBundleServer = async () => {
-    await astexServer(bundleServerAddr.host, bundleServerAddr.port, dir)
+    let { httpserver, app, events } = await astexServer(bundleServerAddr.host, bundleServerAddr.port, dir)
+    bundleServer = httpserver;
     log(chalk.blue("Setup bundle server"));
 }
 
@@ -70,8 +76,10 @@ const setupBrowser = async () => {
     log(chalk.blue("Setup headless browser"));
 }
 
-const trackResponseLoaded = (page, url) => {
+const trackResponseLoaded = (page, url, timeout=2000) => {
     return new Promise((resolve, reject) => {
+        setTimeout(() => { reject() }, timeout);
+        
         page.on('response', (response) => {
             if(response.request().url() === url) {
                 resolve(response);
@@ -146,33 +154,35 @@ describe('1st load of page', function() {
         await setup();
         log(chalk.blue("Setup complete!"));
         shell.cp('example1.js', 'bundle.js')
+        
+        await new Promise((resolve, rej) => {
+            events.on('reloaded', ({ fname }) => {
+                if(fname == 'bundle.js') resolve();
+            });
+        })
     })
     
     after(async () => {
         await teardown();
     });
     
-    it('should request the bootstrap and bundle code', async () => {
-        let bootstrap = trackResponseLoaded(page, `${webappServerAddr.url()}/bootstrapper.js`).then(response => {
+    it.only('should request the bootstrap and bundle code', async () => {
+        let bootstrap = trackResponseLoaded(page, `${webappServerAddr.url()}/turbo.js`).then(response => {
             assert(!response.fromCache());
             return Promise.resolve();
         })
 
-        let client = trackResponseLoaded(page, `${bundleServerAddr.url()}/merkle-ast-client-bundle`).then(response => {
+        let bundle = trackResponseLoaded(page, `${bundleServerAddr.url()}/bundles/bundle.js`).then(response => {
             assert(!response.fromCache());
-            return Promise.resolve();
-        })
-
-        let bundle = trackResponseLoaded(page, `${bundleServerAddr.url()}/bundle-diffs/bundle.js/by-root/undefined`).then(response => {
-            assert(!response.fromCache());
+            // console.log(response.request().headers())
             return Promise.resolve();
         })
 
         await page.goto(webappServerAddr.url(), { waitUntil: ['domcontentloaded', 'networkidle2'] });
-        await Promise.all([
-            bootstrap,
-            client,
-            bundle
+        
+        return Promise.all([
+            assert.isFulfilled(bootstrap),
+            assert.isFulfilled(bundle),
         ]);
     });
 
@@ -188,12 +198,12 @@ describe('1st load of page', function() {
             resourcesLoaded[k] = await response.buffer();
         });
 
-        let bootstrap = trackResponseLoaded(page, `${webappServerAddr.url()}/bootstrapper.js`).then(response => {
+        let bootstrap = trackResponseLoaded(page, `${webappServerAddr.url()}/turbo.js`).then(response => {
             assert(!response.fromCache());
             return Promise.resolve();
         })
 
-        let bundle = trackResponseLoaded(page, `${bundleServerAddr.url()}/bundle-diffs/bundle.js/by-root/bed6d13123a490`).then(response => {
+        let bundle = trackResponseLoaded(page, `${bundleServerAddr.url()}/bundles/bed6d13123a490`).then(response => {
             assert(!response.fromCache());
             return Promise.resolve();
         })
@@ -208,7 +218,7 @@ describe('1st load of page', function() {
         
         // console.log(resourcesLoaded)
 
-        assert.strictEqual(resourcesLoaded[`${bundleServerAddr.url()}/merkle-ast-client-bundle`], undefined, "don't reload merkle client");
+        // assert.strictEqual(resourcesLoaded[`${bundleServerAddr.url()}/merkle-ast-client-bundle`], undefined, "don't reload merkle client");
         assert.strictEqual(resourcesLoaded[`${bundleServerAddr.url()}/bundle-diffs/bundle.js/by-root/undefined`], undefined, "should load the bundle from its tree hash, not from undefined");
         assert.notStrictEqual(resourcesLoaded[`${bundleServerAddr.url()}/bundle-diffs/bundle.js/by-root/bed6d13123a490`], undefined, "bundle diff should be loaded");
 
@@ -217,7 +227,7 @@ describe('1st load of page', function() {
 
 
 
-    it.only(`should load a diff of the new bundle code`, async () => {
+    it(`should load a diff of the new bundle code`, async () => {
         // First load
         // ----------
 
