@@ -1,0 +1,13 @@
+{
+    "compilerOptions":{
+        "downlevelIteration": true,
+        "noImplicitAny": false,
+        "lib":[
+            "es2017",
+            "es2017.object"
+        ],
+        "sourceMap": true,
+        "allowJs": true,
+        "esModuleInterop": true
+    }
+}

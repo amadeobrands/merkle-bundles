@@ -1,3 +1,21 @@
+I would like to see the data flow graph of this code
+and have refactorings/encapsulations suggested instead
+
+
+
+
+being a programmer is like doing a couple things
+matching the shape of inputs and outputs
+    ie configs and compilers
+    ie functions and asyncrhony
+    yada yada
+designing the shape of inputs and outputs
+    within some constraints (memory, environment runtime, libraries)
+    naming
+    predicting future usage
+creating new technical artefacts from designs
+    files, objects, browser windows for tests, tests
+
 
 
 // const assert = require("assert");
@@ -8,22 +26,12 @@ const path = require('path');
 const shell = require('shelljs');
 const Q = require('q');
 
-const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 const assert = chai.assert;
 
-class Addr {
-    constructor(host, port) {
-        this.host = host;
-        this.port = port;
-    }
 
-    url() {
-        return `http://${this.host}:${this.port}`;
-    }
-}
 
 let webappServer;
 const webappServerAddr = new Addr('localhost', 9001)
@@ -106,17 +114,7 @@ function debugBrowser(done) {
     }
 }
 
-class Stats {
-    constructor() {}
 
-    put() {
-
-    }
-    
-    write() {
-
-    }
-}
 
 const setup = async () => {
     shell.cd(dir);

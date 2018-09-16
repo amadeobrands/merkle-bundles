@@ -2,13 +2,11 @@ import * as path from 'path';
 // @ts-ignore
 import program from 'commander';
 // @ts-ignore
-import * as Q from 'q';
-// @ts-ignore
 import * as chokidar from 'chokidar';
 import { readFileSync } from 'fs';
 
-const EventEmitter = require('events');
-// class MyEmitter extends EventEmitter {}
+
+import { EventEmitter } from 'events';
 export const events = new EventEmitter();
 
 
@@ -146,9 +144,9 @@ class Bootstrapper {
     }
 }
 
-import * as express from 'express';
-import * as cors from "cors";
-import * as cookieParser from 'cookie-parser';
+import express from 'express';
+import cors from "cors";
+import cookieParser from 'cookie-parser';
 import { Hash } from '../../core/src/hash';
 
 const app = express();
@@ -188,7 +186,9 @@ app.get('/:bundles/:root', (req, res) => {
 })
 
 class Server {
-    static run(addr: string, port: number): Promise<any> {
+    static run(addr: string, port: number): 
+        Promise<{ app: express.Express, httpserver: Server, events: EventEmitter}> 
+    {
         return new Promise((resolve, reject) => {
             let httpserver = app.listen(port, addr, () => {
                 console.log(`Now running server on http://${addr}:${port}`)
