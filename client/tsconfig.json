@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "lib": [
-      "ES6",
-      "ES2017",
-      "ES2017.object",
+      "es2017",
+      "es2017.object",
       "dom"
     ],
     "outDir": "./dist",
@@ -20,6 +19,7 @@
   },
   
   "include": [
-    "./src/**/*.ts"
+    "./src/**/*.ts",
+    "../test/client/**/*.ts"
   ]
 }
