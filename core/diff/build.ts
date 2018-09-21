@@ -21,8 +21,7 @@ import {
 // @ts-ignore
 import { encode } from '../coding.node';
 
-export function buildDiff(old: Bundle, latest: Bundle) {
-    let common = getCommonChunks(old, latest);
+export function buildDiff(latest: Bundle, common: Chunkset) {
     return _build(latest, common);
 }
 

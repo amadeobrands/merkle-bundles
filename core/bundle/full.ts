@@ -20,6 +20,7 @@ abstract class BundleCore implements LightBundle {
         try {
             ast = parse(this.src, true);
         } catch(ex) {
+            console.error(ex)
             throw new Error(`Couldn't load bundle ${this.name} due to parsing errors: ${ex}`)
         }
         let tree = getHashedTree(ast);
@@ -48,6 +49,7 @@ export class Bundle extends BundleCore {
         this.root = root;
         this.chunks = chunkLookup;
         this.tree = tree.val;
-        this.src = "";
+        // this.src = "";
+        // TODO optimise use of this for latest bundles only...later
     }
 }

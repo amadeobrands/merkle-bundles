@@ -17,9 +17,11 @@ const base = {
 
     context: path.join(__dirname, 'src'),
 
+    // devtool: 'eval-source-map',
+
     node: {
         fs: "empty"
-    },  
+    },
 
     plugins: [
         new CleanWebpackPlugin(path.join(__dirname, 'dist')),
@@ -28,6 +30,11 @@ const base = {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV)
             }
         }),
+        new webpack.SourceMapDevToolPlugin({
+            filename: null,
+            exclude: [/node_modules/],
+            test: /\.ts($|\?)/i
+        })
         // mode == 'production' ? new JavaScriptObfuscator({
         //     rotateUnicodeArray: true
         // }) : () => {}
@@ -44,11 +51,13 @@ const base = {
             //         loader: 'worker-loader',
             //         options: { inline: true, fallback: false }
             //     },
-                
             // },
             {
                 test: /\.ts|js$/,
-                use: ['ts-loader'],
+                loader: 'ts-loader',
+                options: {
+                    configFile: path.resolve(__dirname, './tsconfig.json')
+                },
                 exclude: /node_modules/
             },
         ]
@@ -69,8 +78,8 @@ const bundle = merge({}, base, {
     
 	output: {
         filename: 'bundle.js',
-        libraryTarget: 'window',
-        library: 'MerkleAstBundleClient',
+        // libraryTarget: 'window',
+        // library: 'Turbojs',
     }
 });
 

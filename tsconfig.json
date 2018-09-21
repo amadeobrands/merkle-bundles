@@ -1,18 +1,15 @@
 {
   "compilerOptions": {
     "downlevelIteration": true,
-    "outDir": "./dist/",
     "noImplicitAny": false,
     "esModuleInterop": true,
-    "target": "es2017",
+    "allowSyntheticDefaultImports": true,
     "lib": [
+      "dom",
       "es2017",
       "es2017.object",
     ],
     "sourceMap": true,
     "allowJs": true
-  },
-  "include": [
-    "./src/*.ts"
-  ]
+  }
 }

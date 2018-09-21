@@ -61,17 +61,19 @@ export class BundleLoader {
             let diff = unpackDiff(res);
 
             let src = await applyDiff(
-                this.cacher.getCodeForChunk,
+                (id) => this.cacher.getCodeForChunk(id),
                 diff
             )
 
             console.log(`Building new bundle ${diff.hash}...`)
-            this.buildNewBundle(src)
+            await this.buildNewBundle(src)
+            // TODO performance above.
+            
             return src;
         }
     }
 
-    buildNewBundle(src: string) {
+    async buildNewBundle(src: string) {
         let bundle = new Bundle("", src);
         
         console.log(`Build of bundle ${bundle.root} complete`)
@@ -83,7 +85,7 @@ export class BundleLoader {
         };
 
         console.log(`Storing bundle ${bundle.root}`)
-        this.cacher.storeBundle(newBundle);
+        await this.cacher.storeBundle(newBundle);
     }
 
     async loadAndExec(id: ChunkId) {

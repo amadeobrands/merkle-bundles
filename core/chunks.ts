@@ -29,9 +29,15 @@ export interface HashedTreeWithLocs extends IHashed, IWithCodeRanges
 export type ChunkId = Hash;
 export type Chunkset = Set<ChunkId>;
 
-export function getCommonChunks(a: LightBundle, b: LightBundle): Chunkset {
+export function getCommonChunks(a: LightBundle, bs: LightBundle[]): Chunkset {
     let chunks1 = Object.keys(a.chunks);
-    let chunks2 = new Set(Object.keys(b.chunks));
+    // let chunks2 = new Set(
+    //     ...b.map(bundle => Object.keys(bundle.chunks)) 
+    // );
+    let chunks2 = new Set();
+    bs.map(bundle => {
+        Object.keys(bundle.chunks).map(id => chunks2.add(id));
+    })
     return new Set(chunks1.filter((x: ChunkId) => chunks2.has(x)))
 }
 

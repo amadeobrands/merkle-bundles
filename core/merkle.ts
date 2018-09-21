@@ -1,7 +1,7 @@
 import getType from 'get-object-type';
 
-var esprima = require('esprima');
-import { sha224 } from 'js-sha256';
+import * as esprima from 'esprima';
+
 
 import {
     Hash,
@@ -119,7 +119,7 @@ export function getHashedTree(thing: any): HashValContainer {
 }
 
 export function parse(src: string, range: boolean): any {
-    return esprima.parse(src, { range })
+    return esprima.parseScript(src, { range })
 }
 
 

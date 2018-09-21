@@ -65,6 +65,9 @@ class Stats {
     }
 }
 
+// import mapStackTrace from 'sourcemapped-stacktrace-node';
+const mapStackTrace = require("sourcemapped-stacktrace-node").default;
+
 export class TestBrowser {
     browser: any;
     page: any;
@@ -85,8 +88,25 @@ export class TestBrowser {
         self.page.on('console', msg => {
             log(chalk.gray('[console.log] '), msg.text())
         });
-        self.page.on('pageerror', (x) => {
-            log(chalk.red('[page error] ', x))
+        self.page.on('pageerror', async e => {
+            Error.captureStackTrace(e);
+            console.log(e.stack)
+
+            // log(chalk.red('[page error] ', JSON.stringify(e, null, 1)));
+            // try {
+            //     let st = await mapStackTrace(
+            //         e.stack,
+            //         { isChromeOrEdge: true }
+            //     );
+            //     log(chalk.red('[page error] ', st));
+            // } catch(ex) {
+            //     log(chalk.red(`Error while handling page error, fuck`))
+            //     log(chalk.red(ex))
+            //     console.log(ex)
+            //     log(chalk.red(e))
+            // }
+
+            // log(chalk.red('[page error] ', e));
         });
         // page.setRequestInterception(true);
         log(chalk.blue("Setup headless browser"));

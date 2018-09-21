@@ -1,6 +1,6 @@
 
 // const msgpack = require("msgpack-lite");
-var notepack = require('notepack.io');
+import notepack from 'notepack.io/lib';
 
 export function encode(obj) {
     return notepack.encode(obj);

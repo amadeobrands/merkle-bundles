@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "lib": [
+      "es2015",
       "es2017",
       "es2017.object",
       "dom"
@@ -13,9 +14,8 @@
     "allowSyntheticDefaultImports": true,
     "target": "es6",
     "esModuleInterop": true,
-    "jsx": "react",
-    "sourceMap": true,
     "allowJs": true,
+    "sourceMap": true,
   },
   
   "include": [

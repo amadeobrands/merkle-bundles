@@ -7,7 +7,7 @@ import express from 'express';
 import cors from "cors";
 import cookieParser from 'cookie-parser';
 
-import { Hash } from '../../core/src/hash';
+import { Hash } from '../../core/hash';
 
 import { EventEmitter } from 'events';
 export let events: EventEmitter;
@@ -18,8 +18,9 @@ import {
     BinaryDiff,
     buildDiff,
     ChunkId,
-    TurboJsConfig
-} from '../../core/src/index';
+    TurboJsConfig,
+    getCommonChunks
+} from '../../core/index';
 
 import winston, { createLogger, Logger, LoggerOptions } from 'winston';
 
@@ -155,7 +156,13 @@ export class FileMgr {
             // throw new Error(`No loaded file found for ${fname} with root ${clientRoot}`)
         }
 
-        let diff = buildDiff(old, latest);
+        let common = getCommonChunks(latest, conf.cached.map((id: ChunkId) => {
+            return this.bundles[id];
+        }).filter(Boolean))
+
+        let diff = buildDiff(latest, common);
+        logger.debug(`Sending diff:`)
+        logger.debug(JSON.stringify(diff, null, 1))
         return packDiff(diff);
     }
 
