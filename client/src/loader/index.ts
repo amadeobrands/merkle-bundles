@@ -1,14 +1,14 @@
 import {
     ChunkId
-} from '../../../core/src/chunks';
+} from '../../../core/chunks';
 
 import {
     LightBundle
-} from '../../../core/src/bundle/dumb';
+} from '../../../core/bundle/dumb';
 
 import {
     Bundle
-} from '../../../core/src/bundle/full';
+} from '../../../core/bundle/full';
 
 import {
     ajaxGet
@@ -17,12 +17,16 @@ import {
 import {
     unpackDiff,
     applyDiff
-} from '../../../core/src/diff/apply';
+} from '../../../core/diff/apply';
+// } from '../core/client';
 
 import {
     BundleCacher
 } from '../cache/cacher';
 import { IDBBundleCacher } from '../cache/indexeddb';
+// import { TurboJsConfig } from '../../../core/src';
+// import { TurboJsConfig } from '../../../core/src';
+import { TurboJsConfig } from '.././../../core/index';
 
 
 export class BundleLoader {
@@ -36,15 +40,20 @@ export class BundleLoader {
 
     async load(id: ChunkId): Promise<string> {
         let cached = await this.cacher.getCachedBundles();
+
         if(id in cached) return (await this.cacher.getBundle(id)).src;
-        
         else {
+            let conf: TurboJsConfig = {
+                cached,
+            };
+            
+            // console.log(Buffer.from(JSON.stringify(cached)).toString("base64"))
             let res = await ajaxGet(
                 `${this.endpoint}/bundles/${id}`,  
                 { 
                     responseType: 'arraybuffer',
                     headers: {
-                        'X-TurboJS-Cached': cached.join(',')
+                        'X-TurboJS': Buffer.from(JSON.stringify(conf)).toString("base64")
                     }
                 }
             );

@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { cd, rm, cp } from 'shelljs';
+import { cd, rm, cp, ls } from 'shelljs';
 import chalk from 'chalk';
 import * as chai from 'chai';
 
@@ -7,7 +7,7 @@ chai.use(require("chai-as-promised"));
 const expect = chai.expect;
 const assert = chai.assert;
 
-import { TestBundleServer, Addr, log, TestAppServer, TestBrowser, TextContext } from "./helpers";
+import { TestBundleServer, Addr, log, TestAppServer, TestBrowser } from "../helpers";
 
 
 
@@ -21,7 +21,7 @@ describe('1st load of page', function() {
     this.timeout(15 * 1000);
 
     before(async () => {
-        const dir = resolve(__dirname, "./page1/dist");
+        const dir = resolve(__dirname, "../resources/page1/dist");
         log(`Loading E2E test in ${dir}`);
 
         try {
@@ -39,8 +39,9 @@ describe('1st load of page', function() {
             TestBrowser.setup(false),
         ]);
 
-        cp('example1.js', bundleName)
-        await bundleServer.waitForFileReload(bundleName);
+        let bundleLoaded = bundleServer.waitForFileReload(bundleName);
+        cp('example1.js', bundleName);
+        await bundleLoaded;
         log(chalk.blue("Setup complete!"));
     })
     
@@ -51,7 +52,9 @@ describe('1st load of page', function() {
         ])
     });
 
-    it('waits a fuckton', async function() {
-        return new Promise((res, rej) => setTimeout(res, 20000));
+    it('Loads the bundle loader', async function() {
+        await browser.page.goto(appServer.addr.url(), { waitUntil: ['domcontentloaded', 'networkidle2'] });
+        
+        // return new Promise((res, rej) => setTimeout(res, 1000));
     })
 })

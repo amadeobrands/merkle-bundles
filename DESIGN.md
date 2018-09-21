@@ -1,3 +1,15 @@
+build:
+
+client needs to be generated in a very small bundle (webpack probs)
+server just needs to be bundled into an executable
+
+the core needs to be shared between the two
+remain agnostic probs
+
+
+
+
+
 cookie:
 - contains hash of bundles, and hash of current source
 

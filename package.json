@@ -1,9 +1,14 @@
 {
+   "license": "none",
    "scripts": {
+      "test:server": "mocha -r ts-node/register test/server/index.ts",
+      "test:client:watch": "mocha-typescript-watch -p client/tsconfig.json client/dist/test/client/index.js",
+      "test:client": "mocha -r ts-node/register test/client/index.ts",
       "test:e2e": "mocha -r ts-node/register test/e2e/index.ts"
    },
    "devDependencies": {
       "@types/chai": "^4.1.4",
+      "@types/chai-as-promised": "^7.1.0",
       "@types/express": "^4.16.0",
       "@types/mocha": "^5.2.5",
       "@types/shelljs": "^0.8.0",
@@ -11,12 +16,19 @@
       "chai-as-promised": "^7.1.1",
       "chalk": "^2.4.1",
       "mocha": "^5.2.0",
+      "mocha-typescript": "^1.1.17",
       "path": "^0.12.7",
       "puppeteer": "^1.8.0",
       "q": "^1.5.1",
       "shelljs": "^0.8.2",
       "static-server": "^2.2.1",
+      "tmp": "^0.0.33",
       "ts-node": "^7.0.1",
       "typescript": "^3.0.3"
+   },
+   "dependencies": {
+      "arraybuffer-to-string": "^1.0.2",
+      "get-object-type": "^0.0.2",
+      "js-sha256": "^0.9.0"
    }
 }

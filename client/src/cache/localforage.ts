@@ -1,10 +1,10 @@
 import {
     ChunkId
-} from '../../../core/src/chunks';
+} from '../../../core/chunks';
 
 import {
     LightBundle
-} from '../../../core/src/bundle/dumb';
+} from '../../../core/bundle/dumb';
 
 // @ts-ignore
 import localforage from 'localforage';

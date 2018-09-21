@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+      "lib": [
+        "ES6",
+        "ES2017",
+        "ES2017.object",
+        "dom"
+      ],
+      "downlevelIteration": true,
+      "outDir": "./dist/",
+      "noImplicitAny": false,
+      "module": "es6",
+      "moduleResolution": "node",
+      "target": "es5",
+      "jsx": "react",
+      "sourceMap": true,
+      "allowJs": true
+    },
+    "include": [
+      "../core/src/**/*.ts",
+      "../../client/src/**/*.ts",
+      "./**/*.ts"
+    ]
+  }

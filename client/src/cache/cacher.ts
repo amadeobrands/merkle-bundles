@@ -1,5 +1,5 @@
-import { ChunkId } from "../../../core/src/chunks";
-import { LightBundle } from "../../../core/src/bundle/dumb";
+import { ChunkId } from "../../../core/chunks";
+import { LightBundle } from "../../../core/bundle/dumb";
 
 export abstract class BundleCacher {
     abstract async storeBundle(bundle: LightBundle);

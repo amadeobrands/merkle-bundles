@@ -6,13 +6,20 @@
       "ES2017.object",
       "dom"
     ],
+    "outDir": "./dist",
     "downlevelIteration": true,
-    "outDir": "./dist/",
     "noImplicitAny": false,
-    "module": "es6",
-    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "target": "es6",
+    "esModuleInterop": true,
     "jsx": "react",
     "sourceMap": true,
-    "allowJs": true
-  }
+    "allowJs": true,
+  },
+  
+  "include": [
+    "./src/**/*.ts"
+  ]
 }

@@ -1,5 +1,5 @@
 
-import astexServer, { events } from '../../server/src/index';
+import astexServer, { events } from '../server/src/index';
 
 import chalk from 'chalk';
 import puppeteer from 'puppeteer';
@@ -9,7 +9,7 @@ export class Addr {
     host: string;
     port: number;
 
-    constructor(host, port) {
+    constructor(host: string, port: number) {
         this.host = host;
         this.port = port;
     }
@@ -30,7 +30,8 @@ export class TestBundleServer {
     static async setup(addr: Addr, dir: string): Promise<TestBundleServer> {
         let s = new TestBundleServer;
         s.addr = addr;
-        let { httpserver, app, events } = await astexServer(addr.host, addr.port, dir)
+        // let { httpserver, app, events } = await astexServer(addr.host, addr.port, dir, 'debug')
+        let { httpserver, app, events } = await astexServer(addr.host, addr.port, dir, 'error')
         log(chalk.blue("Setup bundle server"));
         s.server = httpserver;
         s.events = events;
@@ -120,12 +121,14 @@ import StaticServer = require('static-server');
 
 export class TestAppServer {
     server: any;
+    addr: Addr;
 
     constructor() {}
 
     static async setup(addr: Addr, dir: string): Promise<TestAppServer> {
         let self = new TestAppServer;
-
+        
+        self.addr = addr;
         self.server = new StaticServer({
             rootPath: dir,
             host: addr.host,
@@ -147,8 +150,34 @@ export class TestAppServer {
     }
 }
 
-export class TextContext {
-    constructor() {}
 
+import tmp, { dirSync } from 'tmp';
+import { cd, cp } from 'shelljs';
+import { EventEmitter } from 'events';
+tmp.setGracefulCleanup(true);
 
+export class TestContext {
+    basedir;
+    tmpdir: string;
+
+    constructor(basedir: string) {
+        this.basedir = basedir;
+        // this.basedir = resolve(__dirname, "../resources/page1/dist");
+    }
+
+    getTmpDir() {
+        this.tmpdir = dirSync().name;
+        cd(this.basedir);
+        cp('*', this.tmpdir);
+        cd(this.tmpdir);
+    }
+
+    waitForReload(events: EventEmitter, f: string): Promise<any> {
+        return new Promise((res, rej) => {
+            setTimeout(() => rej(false), 1900);
+            events.on('reloaded', ({ fname }) => {
+                if(fname === f) res();
+            });
+        })
+    }
 }
