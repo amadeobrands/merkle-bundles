@@ -1,3 +1,8 @@
+Page with script and bundle name specified
+First load - server 
+
+
+
 build:
 
 client needs to be generated in a very small bundle (webpack probs)

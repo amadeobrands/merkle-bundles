@@ -29,6 +29,8 @@ import { IDBBundleCacher } from '../cache/indexeddb';
 import { TurboJsConfig } from '.././../../core/index';
 
 
+
+
 export class BundleLoader {
     endpoint: string;
     cacher: BundleCacher;
@@ -41,7 +43,11 @@ export class BundleLoader {
     async load(id: ChunkId): Promise<string> {
         let cached = await this.cacher.getCachedBundles();
 
-        if(id in cached) return (await this.cacher.getBundle(id)).src;
+        if(cached.includes(id)) {
+            console.log(`Loading cached bundle: ${id}`)
+            return (await this.cacher.getBundle(id)).src;
+        }
+
         else {
             let conf: TurboJsConfig = {
                 cached,
@@ -87,6 +93,10 @@ export class BundleLoader {
         console.log(`Storing bundle ${bundle.root}`)
         await this.cacher.storeBundle(newBundle);
     }
+
+    // async loadAndExecById(id: ChunkId) {
+
+    // }
 
     async loadAndExec(id: ChunkId) {
         let src = await this.load(id);

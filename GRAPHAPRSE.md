@@ -1,3 +1,11 @@
+I just want to spread the call graph of the JS right in front of my eyes
+
+
+OMG ASDISABDIASBHDHIASHDIOASHJDIUASDBHAIOUSDHAISUDHASIUDBASDIUBASDIUbasd
+
+
+
+
 I would like to see the data flow graph of this code
 and have refactorings/encapsulations suggested instead
 

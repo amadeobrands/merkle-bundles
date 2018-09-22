@@ -1,5 +1,6 @@
 import { BundleLoader } from "../loader/index";
 import { parseUrl } from "../helpers";
+import { ChunkId } from "../../../core";
 
 // Things we need:
 // - identify current chunks from cache
@@ -12,16 +13,18 @@ import { parseUrl } from "../helpers";
 export const GLOBAL = "TurboJS";
 export const EVENT_LOADED = `turbojs-loaded`;
 
-function bootstrap() {
+function bootstrap(ids: ChunkId[]) {
     let el = document.getElementById('turbojs') as HTMLScriptElement;
     if(!el) {
         throw new Error("Couldn't find TurboJS script. Did you forget to set <script id='turbojs' .../>?");
     }
 
-    let scriptsToLoad = (el.getAttribute("data-scripts") || '').split(',');
-    if(!scriptsToLoad.length) {
-        throw new Error("Was not provided with any scripts - try setting <script data-scripts='bundle.js,bundle2.js' .../>");
-    }
+    console.log(`Loading scripts: ${JSON.stringify(ids)}`)
+    let scriptsToLoad = ids;
+    // let scriptsToLoad = (el.getAttribute("data-scripts") || '').split(',');
+    // if(!scriptsToLoad.length) {
+    //     throw new Error("Was not provided with any scripts - try setting <script data-scripts='bundle.js,bundle2.js' .../>");
+    // }
     
     let addr = parseUrl(el.src);
     let endpoint = `${addr.protocol}//${addr.host}`;
@@ -37,6 +40,7 @@ function bootstrap() {
 // import Cookie from 'js-cookie';
 // Cookie.set(PACKAGE_JSON.name, PACKAGE_JSON.version);
 
-(async function() {
-    bootstrap()
-})()
+export default bootstrap;
+// (async function() {
+    
+// })()

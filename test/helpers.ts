@@ -85,12 +85,18 @@ export class TestBrowser {
         });
 
         self.page = await self.browser.newPage();
-        self.page.on('console', msg => {
-            log(chalk.gray('[console.log] '), msg.text())
+        self.page.on('console', async msg => {
+            let str = await Promise.all(msg.args().map(jsHandle => jsHandle.jsonValue()));
+            log(
+                chalk.gray('[console.log] '), 
+                // msg.text()
+                ...str
+            )
         });
         self.page.on('pageerror', async e => {
-            Error.captureStackTrace(e);
-            console.log(e.stack)
+            // Error.captureStackTrace(e);
+            // console.log(e.stack)
+            log(chalk.red('[page error] ', e));
 
             // log(chalk.red('[page error] ', JSON.stringify(e, null, 1)));
             // try {

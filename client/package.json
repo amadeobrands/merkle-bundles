@@ -12,7 +12,8 @@
   "scripts": {
     "locals": "yarn add ../core && yarn add -D ../server",
     "build": "NODE_ENV=production webpack --mode=production --config webpack.config.js",
-    "dev": "NODE_ENV=development webpack --watch --config webpack.config.js",
+    "dev": "NODE_ENV=development webpack --config webpack.config.js",
+    "dev:watch": "NODE_ENV=development webpack --watch --config webpack.config.js",
     "test:unit": "$(npm bin)/merkle-ast-serve -d tests/client/test-bundles/ | karma start client.karma.conf.js",
     "test:e2e": "mocha -r ts-node/register ./test/e2e/index",
     "test:e2e:dev": "cd test/e2e/page1/ && webpack --watch --config webpack.config.js",

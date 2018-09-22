@@ -17,7 +17,7 @@ const base = {
 
     context: path.join(__dirname, 'src'),
 
-    // devtool: 'eval-source-map',
+    devtool: 'eval-source-map',
 
     node: {
         fs: "empty"
@@ -78,8 +78,8 @@ const bundle = merge({}, base, {
     
 	output: {
         filename: 'bundle.js',
-        // libraryTarget: 'window',
-        // library: 'Turbojs',
+        libraryTarget: 'var',
+        library: 'TurbojsBootstrapper',
     }
 });
 

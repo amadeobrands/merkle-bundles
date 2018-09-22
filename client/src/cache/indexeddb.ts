@@ -1,5 +1,5 @@
 import {
-    ChunkId
+    ChunkId, SourceCodeRange
 } from '../../../core/chunks';
 
 import {
@@ -39,20 +39,24 @@ export class IDBBundleCacher extends BundleCacher {
     }
 
     async getBundle(key: ChunkId): Promise<LightBundle> {
-        let bundles = this.db.bundles.where(':root').equals(key).limit(1);
+        let bundles = this.db.bundles.where('root').equals(key).limit(1);
         if(await bundles.count() == 0) return null;
-        return bundles.toArray()[0];
+        let bundles_ = await bundles.toArray();
+        let bundle = bundles_[0];
+        return bundle;
     }
 
     async getCachedBundles(): Promise<ChunkId[]> {
         let ids = await this.db.bundles.orderBy('root').primaryKeys() as ChunkId[];
+        console.log(ids)
         return ids;
     }
 
     async getCodeForChunk(id: ChunkId): Promise<string> {
-        let chunks = this.db.chunks.where(':id').equals(id).limit(1);
+        let chunks = this.db.chunks.where('id').equals(id).limit(1);
         if(await chunks.count() == 0) throw new Error(`Couldn't find chunk by id ${id}`);
-        let chunk = chunks.toArray()[0];
+        let chunks_ = await chunks.toArray();
+        let chunk = chunks_[0];
         let [from, to] = chunk.range;
         
         let bundle = await this.getBundle(chunk.bundleId);

@@ -182,13 +182,16 @@ class Bootstrapper {
         this.loadedBefore = loadedBefore;
     }
 
-    renderJS() {
+    renderJS(bundleIds: ChunkId[]) {
         // if(this.loadedBefore) {
         //     return readFile('bootstrap-slim.js');
         // }
         
         // https://github.com/webpack/webpack-dev-middleware
-        return readFile('bundle.js');
+
+        return `${readFile('bundle.js')};
+        TurbojsBootstrapper.default(${JSON.stringify(bundleIds)});
+        `;
     }
 }
 
@@ -209,18 +212,26 @@ app.use(cookieParser());
 // })
 
 app.get('/turbo.js', (req, res) => {
-    let cookies = req.cookies;
-    let loadedBefore = cookies[OUR_BEAUTIFUL_NAME] === OUR_BEAUTIFUL_META;
-    logger.info(`Loaded before: ${loadedBefore}`)
-    loadedBefore = false;
+    // let cookies = req.cookies;
+    // let loadedBefore = cookies[OUR_BEAUTIFUL_NAME] === OUR_BEAUTIFUL_META;
+    // logger.info(`Loaded before: ${loadedBefore}`)
+    // loadedBefore = false;
     // if(loadedBefore) {
     //     console.log("Loaded before");
     // } else {
     //     res.cookie(OUR_BEAUTIFUL_NAME, OUR_BEAUTIFUL_META, { maxAge: 900000, httpOnly: true });
     // }
-    
-    let bs = new Bootstrapper(loadedBefore);
-    res.write(bs.renderJS(), 'utf-8');
+
+    // TODO
+    // obvious RCE vulns here
+
+    let bundlesByName = req.query.bundles.split(',');
+    let bundleIds = bundlesByName.map(bundleName => {
+        let bundleId = fmgr.latest[bundleName];
+        if(!bundleId) throw new Error(`No loaded bundle named ${bundleName} found`);
+    })
+    let bs = new Bootstrapper(false);
+    res.write(bs.renderJS(bundleIds), 'utf-8');
     res.end();
 });
 

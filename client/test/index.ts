@@ -34,4 +34,6 @@ describe('BundleCacher', function() {
         let cacher = new IDBBundleCacher();
         expect(cacher.db).to.be.an.instanceof(Dexie);
     })
+
+    it("fails adding two bundles with same id", () => {})
 })
