@@ -22,6 +22,10 @@ export function ajaxGet(url: string, userOpts: ajaxOpts): Promise<any> {
         xhr.responseType = opts.responseType;
         
         xhr.onload = function(e) {
+            if(this.status !== 200) {
+                throw `${url} - ${this.statusText}`;
+            }
+
             let res = this.response;
             switch(opts.responseType) {
                 case 'arraybuffer':

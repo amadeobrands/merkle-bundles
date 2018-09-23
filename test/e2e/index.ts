@@ -37,7 +37,7 @@ describe('1st load of page', function() {
         ] = await Promise.all([
             TestBundleServer.setup(new Addr('localhost', 9002), dir),
             TestAppServer.setup(new Addr('localhost', 9001), dir),
-            TestBrowser.setup(true),
+            TestBrowser.setup(false),
         ]);
 
         let bundleLoaded = bundleServer.waitForFileReload(bundleName);

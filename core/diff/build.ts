@@ -18,8 +18,7 @@ import {
     getCommonChunks,
 } from '../chunks';
 
-// @ts-ignore
-import { encode } from '../coding.node';
+import { getCoder } from '../coding';
 
 export function buildDiff(latest: Bundle, common: Chunkset) {
     return _build(latest, common);
@@ -104,7 +103,8 @@ function _build(latest: Bundle, commonChunks: Chunkset): Diff {
 
 export function packDiff(diff: Diff): BinaryDiff {
     let val = diff;
-    var buffer = encode(val);
+    let buffer = getCoder().encode(val);
+
     // @ts-ignore
     // TODO       TS2322: Type 'Buffer' is not assignable to type 'ArrayBuffer'.
     return buffer;

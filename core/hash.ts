@@ -14,7 +14,8 @@ export const hasher = (v: any) : Hash => {
     // in dictionary lookups and for comparisons
     // while conserving space
     let buf: ArrayBuffer = sha224.arrayBuffer(`${v}`);
-    return ab2str(buf, 'binary');
+    // return ab2str(buf, 'binary');
+    return ab2str(buf, 'base64');
 }
 
 

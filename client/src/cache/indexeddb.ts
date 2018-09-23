@@ -48,7 +48,6 @@ export class IDBBundleCacher extends BundleCacher {
 
     async getCachedBundles(): Promise<ChunkId[]> {
         let ids = await this.db.bundles.orderBy('root').primaryKeys() as ChunkId[];
-        console.log(ids)
         return ids;
     }
 

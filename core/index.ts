@@ -10,5 +10,11 @@ export * from './bundle/full';
 export * from './helper';
 
 export interface TurboJsConfig {
-    cached: ChunkId[]
+    bundleId: ChunkId | null;
+    cached: ChunkId[];
 }
+
+export interface BundleDetail {
+    name: string,
+    id: ChunkId,
+};

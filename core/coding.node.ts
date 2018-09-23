@@ -1,5 +1,3 @@
-
-// const msgpack = require("msgpack-lite");
 import notepack from 'notepack.io/lib';
 
 export function encode(obj) {

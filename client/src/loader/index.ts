@@ -26,9 +26,10 @@ import {
 import { IDBBundleCacher } from '../cache/indexeddb';
 // import { TurboJsConfig } from '../../../core/src';
 // import { TurboJsConfig } from '../../../core/src';
-import { TurboJsConfig } from '.././../../core/index';
+import { TurboJsConfig, BundleDetail } from '.././../../core/index';
+import { setCoder } from '../../../core/coding';
 
-
+import * as coder from '../../../core/coding.web';
 
 
 export class BundleLoader {
@@ -38,24 +39,27 @@ export class BundleLoader {
     constructor(endpoint: string) {
         this.endpoint = endpoint;
         this.cacher = new IDBBundleCacher();
-    }
+        setCoder(coder);
+    }   
 
-    async load(id: ChunkId): Promise<string> {
+    async load(detail: BundleDetail, exec: boolean): Promise<string> {
+        let { id } = detail;
         let cached = await this.cacher.getCachedBundles();
 
         if(cached.includes(id)) {
-            console.log(`Loading cached bundle: ${id}`)
+            console.log(`Loading cached bundle ${detail.name} with root ${id}`)
             return (await this.cacher.getBundle(id)).src;
         }
 
         else {
             let conf: TurboJsConfig = {
                 cached,
+                bundleId: null
             };
             
             // console.log(Buffer.from(JSON.stringify(cached)).toString("base64"))
             let res = await ajaxGet(
-                `${this.endpoint}/bundles/${id}`,  
+                `${this.endpoint}/bundles/${encodeURIComponent(id)}`,  
                 { 
                     responseType: 'arraybuffer',
                     headers: {
@@ -74,6 +78,11 @@ export class BundleLoader {
             console.log(`Building new bundle ${diff.hash}...`)
             await this.buildNewBundle(src)
             // TODO performance above.
+            
+            // let src = await this.load(id);
+            if(exec) {
+                eval(src);
+            }
             
             return src;
         }
@@ -97,9 +106,4 @@ export class BundleLoader {
     // async loadAndExecById(id: ChunkId) {
 
     // }
-
-    async loadAndExec(id: ChunkId) {
-        let src = await this.load(id);
-        eval(src);
-    }
 }

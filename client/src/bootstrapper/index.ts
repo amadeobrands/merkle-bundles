@@ -1,6 +1,6 @@
 import { BundleLoader } from "../loader/index";
 import { parseUrl } from "../helpers";
-import { ChunkId } from "../../../core";
+import { ChunkId, BundleDetail } from "../../../core";
 
 // Things we need:
 // - identify current chunks from cache
@@ -13,14 +13,16 @@ import { ChunkId } from "../../../core";
 export const GLOBAL = "TurboJS";
 export const EVENT_LOADED = `turbojs-loaded`;
 
-function bootstrap(ids: ChunkId[]) {
+
+function bootstrap(bundleDetails: BundleDetail[]) {
     let el = document.getElementById('turbojs') as HTMLScriptElement;
     if(!el) {
         throw new Error("Couldn't find TurboJS script. Did you forget to set <script id='turbojs' .../>?");
     }
 
-    console.log(`Loading scripts: ${JSON.stringify(ids)}`)
-    let scriptsToLoad = ids;
+    // let ids = bundleDetails.map(detail => detail.id);
+    // console.log(`Loading scripts: ${JSON.stringify(ids)}`)
+
     // let scriptsToLoad = (el.getAttribute("data-scripts") || '').split(',');
     // if(!scriptsToLoad.length) {
     //     throw new Error("Was not provided with any scripts - try setting <script data-scripts='bundle.js,bundle2.js' .../>");
@@ -33,7 +35,10 @@ function bootstrap(ids: ChunkId[]) {
     window[GLOBAL] = loader;
     document.dispatchEvent(new Event(EVENT_LOADED));
     
-    scriptsToLoad.map(script => loader.loadAndExec(script));
+    bundleDetails.map(detail => {
+        console.log(`Loading bundle ${detail.name}, root ${detail.id}`)
+        loader.load(detail, true);
+    });
 }
 
 // set(CLIENT_GLOBAL_NAME, code);
@@ -41,6 +46,3 @@ function bootstrap(ids: ChunkId[]) {
 // Cookie.set(PACKAGE_JSON.name, PACKAGE_JSON.version);
 
 export default bootstrap;
-// (async function() {
-    
-// })()

@@ -13,8 +13,8 @@ import {
 
 import getType from 'get-object-type';
 
-// @ts-ignore
-import { decode } from '../coding.web';
+
+import { getCoder } from '../coding';
 
 /*
 Looks up the source code of a chunk
@@ -48,7 +48,7 @@ export async function applyDiff(lookupChunkCode: chunkCodeLookupFn, diff: Diff) 
 }
 
 export function unpackDiff(buf: BinaryDiff): Diff {
-    return decode(buf);
+    return getCoder().decode(buf);
 }
 
 

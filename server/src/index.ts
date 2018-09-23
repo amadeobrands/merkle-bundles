@@ -19,10 +19,12 @@ import {
     buildDiff,
     ChunkId,
     TurboJsConfig,
-    getCommonChunks
+    getCommonChunks,
+    BundleDetail
 } from '../../core/index';
 
 import winston, { createLogger, Logger, LoggerOptions } from 'winston';
+import { setCoder } from '../../core/coding';
 
 let loggerConfig = {
     level: 'error',
@@ -92,6 +94,7 @@ export class FileMgr {
     basePath: string;
     bundles: BundleStore = {};
     latest: LatestBundleStore = {};
+    latestReverse = {};
 
     constructor(basePath: string) {
         this.basePath = basePath;
@@ -136,23 +139,31 @@ export class FileMgr {
         let bundle = new Bundle(fname, content);
         this.bundles[bundle.root] = bundle;
         this.latest[fname] = bundle.root;
+        this.latestReverse[bundle.root] = fname;
 
         events.emit('reloaded', { fname, root: bundle.root });
         logger.info(`reloading complete: ${fname}, new root ${bundle.root}`)
     }
 
-    generateDiff(fname: string, conf: TurboJsConfig): BinaryDiff {
+    generateDiff(latestId: ChunkId, conf: TurboJsConfig): BinaryDiff {
         // https://github.com/binast/binjs-ref
-        let latestRoot = this.latest[fname];
-
-        let old = this.bundles[latestRoot];
-        let latest = this.bundles[latestRoot];
         
-        if(!old) {
-            throw new Error(`Couldn't find bundle that client mentioned: ${fname}`);
-        }
+        // let latestId = this.latestReverse[bundleName];
+        let latest = this.bundles[latestId];
+        console.log(this.latest)
+
+        // let oldestId = conf.bundleId;
+        // let bundleName = this.latestReverse[conf.bundleId];
+        // let latestId = this.latest[bundleName];
+        
+        // let old = this.bundles[oldestId];
+        // let latest = this.bundles[latestId];
+        
+        // if(!old) {
+        //     throw new Error(`Couldn't find bundle that client mentioned: ${bundleName}`);
+        // }
         if(!latest) {
-            throw new Error(`Couldn't find bundle that client mentioned: ${fname}`);
+            throw new Error(`Couldn't find bundle that client mentioned: ${latestId}`);
             // throw new Error(`No loaded file found for ${fname} with root ${clientRoot}`)
         }
 
@@ -182,7 +193,7 @@ class Bootstrapper {
         this.loadedBefore = loadedBefore;
     }
 
-    renderJS(bundleIds: ChunkId[]) {
+    renderJS(bundleDetails: BundleDetail[]) {
         // if(this.loadedBefore) {
         //     return readFile('bootstrap-slim.js');
         // }
@@ -190,11 +201,13 @@ class Bootstrapper {
         // https://github.com/webpack/webpack-dev-middleware
 
         return `${readFile('bundle.js')};
-        TurbojsBootstrapper.default(${JSON.stringify(bundleIds)});
+        TurbojsBootstrapper.default(${JSON.stringify(bundleDetails)});
         `;
     }
 }
 
+import * as coder from '../../core/coding.node';
+setCoder(coder);
 
 let clientInfo = require('/Users/liamz/Documents/open-source/js-merkle-bundles/client/package.json');
 
@@ -226,23 +239,28 @@ app.get('/turbo.js', (req, res) => {
     // obvious RCE vulns here
 
     let bundlesByName = req.query.bundles.split(',');
-    let bundleIds = bundlesByName.map(bundleName => {
-        let bundleId = fmgr.latest[bundleName];
-        if(!bundleId) throw new Error(`No loaded bundle named ${bundleName} found`);
+    let bundleDetails: BundleDetail[] = bundlesByName.map((name): BundleDetail => {
+        let id = fmgr.latest[name];
+        if(!id) throw new Error(`No loaded bundle named ${name} found`);
+        return {
+            id,
+            name,
+        }
     })
     let bs = new Bootstrapper(false);
-    res.write(bs.renderJS(bundleIds), 'utf-8');
+    res.write(bs.renderJS(bundleDetails), 'utf-8');
     res.end();
 });
 
-app.get('/:bundles/:fname', (req, res) => {
+
+
+app.get('/bundles/:id', (req, res) => {
+    let bundleId = req.params.id;
     let turboJsData = req.get('X-TurboJS');
     let turboJsConfig = JSON.parse(Buffer.from(turboJsData, 'base64').toString());
     logger.info(`Request with data ${JSON.stringify(turboJsConfig,null,1)}`)
 
-    let fname: string = req.params.fname;
-    // let root = req.params.root || null;
-    let diff = fmgr.generateDiff(fname, turboJsConfig);
+    let diff = fmgr.generateDiff(bundleId, turboJsConfig);
     res.write(diff, 'binary');
     res.end(null, 'binary');
 })
