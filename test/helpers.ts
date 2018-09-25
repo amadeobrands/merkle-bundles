@@ -48,6 +48,14 @@ export class TestBundleServer {
         })
     }
 
+    async replaceAndWaitForReload(file: string, replaceWithFile: string): Promise<any> {
+        cp(replaceWithFile, file);
+        return await this.waitForFileReload(file);
+        // let bundleLoaded = bundleServer.waitForFileReload(bundleName);
+        
+        // await bundleLoaded;
+    }
+
     async close() {
         return await this.server.close();
     }

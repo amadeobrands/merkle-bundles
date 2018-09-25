@@ -1,25 +1,19 @@
 import { resolve } from 'path';
 import { cd, rm, cp, ls } from 'shelljs';
 import chalk from 'chalk';
-import * as chai from 'chai';
-
-chai.use(require("chai-as-promised"));
-const expect = chai.expect;
-const assert = chai.assert;
 
 import { TestBundleServer, Addr, log, TestAppServer, TestBrowser } from "../helpers";
 
 let bundleServer: TestBundleServer;
 let appServer: TestAppServer;
 let browser: TestBrowser;
-
 const bundleName = 'bundle.js';
 
-describe('1st load of page', function() {
-    this.timeout(15 * 1000);
-    this.timeout(0 * 1000);
 
-    before(async () => {
+import { Simulation } from './helpers';
+
+class Sim1 extends Simulation {
+    async before() {
         const dir = resolve(__dirname, "../resources/page1/dist");
         log(`Loading E2E test in ${dir}`);
 
@@ -42,21 +36,40 @@ describe('1st load of page', function() {
         cp('example1.js', bundleName);
         await bundleLoaded;
         log(chalk.blue("Setup complete!"));
-    })
-    
-    after(async () => {
+
+    }
+
+    async after() {
         await Promise.all([
             bundleServer.close(),
             appServer.close()
-        ])
-    });
+        ]);
+    }
 
-    it('Loads the bundle loader', async function() {
+    async sim() {
+        let responses = {};
+
         await bundleServer.replaceAndWaitForReload('bundle.js', 'example1.js')
+        browser.page.on('response', async (response) => {
+            let k = response.request().url();
+            let buf = await response.buffer();
+            log(`Response ${k}, ${buf.length} bytes`)
+            // responses[k] = await response.buffer();
+        });
         await browser.page.goto(appServer.addr.url(), { waitUntil: ['domcontentloaded', 'networkidle2'] });
         
         await bundleServer.replaceAndWaitForReload('bundle.js', 'example2.js')
+        browser.page.on('response', async (response) => {
+            let k = response.request().url();
+            let buf = await response.buffer();
+            log(`Response ${k}, ${buf.length} bytes`)
+            responses[k] = await response.buffer();
+        });
         await browser.page.goto(appServer.addr.url(), { waitUntil: ['domcontentloaded', 'networkidle2'] });
         return new Promise((res, rej) => setTimeout(res, 100000));
-    });
-})
+    }
+}
+
+
+let sim = new Sim1();
+sim.run();

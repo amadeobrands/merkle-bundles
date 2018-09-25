@@ -25,7 +25,7 @@ export class IDBBundleCacher extends BundleCacher {
     }
 
     async storeBundle(bundle: LightBundle) {
-        await this.db.bundles.add(bundle)
+        await this.db.bundles.put(bundle)
 
         let chunks = Object.entries(bundle.chunks).map(([ id, range ]) => {
             return {
@@ -35,7 +35,13 @@ export class IDBBundleCacher extends BundleCacher {
             }
         });
 
-        await this.db.chunks.bulkAdd(chunks);
+        try {
+            await this.db.chunks.bulkPut(chunks);
+        } catch(err) {
+            err.failures.forEach(failure => {
+                console.error (failure.message);
+            });
+        }
     }
 
     async getBundle(key: ChunkId): Promise<LightBundle> {

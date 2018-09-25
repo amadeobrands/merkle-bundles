@@ -5,7 +5,8 @@
       "test:client:watch": "mocha-typescript-watch -p client/tsconfig.json client/dist/test/client/index.js",
       "test:client": "mocha -r ts-node/register test/client/index.ts",
       "build": "cd client && yarn build",
-      "test:e2e": "mocha -r ts-node/register test/e2e/index.ts"
+      "test:e2e": "mocha -r ts-node/register test/e2e/index.ts",
+      "sim": "ts-node test/sim/index.ts"
    },
    "devDependencies": {
       "@types/chai": "^4.1.4",

@@ -1,5 +1,5 @@
-x = 2;
-function shout() {
-    console.log("BLOCKCHAIN!", "IOT!");
+window.x = 2;
+function shout(a) {
+    console.log("BLOCKCHAIN!", "IOT!", a);
 }
-shout();
+shout(x);

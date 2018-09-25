@@ -1,3 +1,21 @@
+Idea:
+
+we use the hash tree as a compact form for comparing knowledge about source trees between nodes
+but we can also just use the root hash and then the index in the tree, rather than referring the full node IDs
+
+
+
+
+data to capture?
+evidence to collect
+data to prove argument
+
+
+
+
+
+
+
 Page with script and bundle name specified
 First load - server 
 

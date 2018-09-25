@@ -81,7 +81,11 @@ export class BundleLoader {
             
             // let src = await this.load(id);
             if(exec) {
-                eval(src);
+                try {
+                    eval(src);
+                } catch(ex) {
+                    throw new Error(`${detail.name}: error while running bundle \n${ex}`)
+                }
             }
             
             return src;
